@@ -27,6 +27,7 @@ void str_free(struct str* s);
 struct str str_resize(struct str* s, size_t newsz);
 struct str str_aprintf(const char* fmt, ...);
 
+#define SHEEP_STR_INIT_CAP 512
 #ifdef SHEEP_STR_HAVE_STB_DS
 
 #define str_split(a,b) \
@@ -50,8 +51,8 @@ struct str* str_split_cstr(struct str haystack, char* needle);
 struct str
 str_new()
 {
-	char* b = calloc(512, 1);
-	return (struct str){ b, 512, 0 } ;
+	char* b = calloc(SHEEP_STR_INIT_CAP, 1);
+	return (struct str){ b, SHEEP_STR_INIT_CAP, 0 } ;
 }
 
 struct str

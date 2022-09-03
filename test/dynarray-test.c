@@ -70,6 +70,7 @@ START_TEST(arrdel_test)
     ck_assert_int_eq(arrlen(a), 4);
     arrfree(a);
 }
+END_TEST
 
 START_TEST(arrins_test)
 {
@@ -85,14 +86,26 @@ START_TEST(arrins_test)
     arrfree(a);
     a = arrnew(int);
     for (int i = 0; i < 5; i++)
-        arrins(a, 0, i); // 4 3 2 1 0
-    ck_assert_int_eq(a[1], 3);
+        arrpush(a, i);
+    ck_assert_int_eq(a[3], 3);
+    arrins(a, 3, -1);
+    ck_assert_int_eq(a[3], -1);
+    arrins(a, 6, -2);
+    ck_assert_int_eq(a[6], -2);
+    int n = arrlen(a);
+    for (int i = n; i < n + 5; i++)
+    {
+        arrins(a, i, i);
+        ck_assert_int_eq(a[i], i);
+    }
+    arrfree(a);
 }
+END_TEST
 
 int main()
 {
-    Suite *s1 = suite_create("Core");
-    TCase *tc = tcase_create("Core");
+    Suite *s1 = suite_create("Dynarray");
+    TCase *tc = tcase_create("Dynarray");
     SRunner *sr = srunner_create(s1);
     int nf;
 

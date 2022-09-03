@@ -115,6 +115,8 @@ typedef struct {
 
 #define DYNARRAY_MIN_CAPACITY 4
 
+#ifndef SHEEP_DYNARRAY_NOSHORTHAND
+
 #define arrnew dynarray_new
 #define arrfree dynarray_free
 #define arrlen dynarray_len
@@ -126,13 +128,14 @@ typedef struct {
 #define arrsetcap dynarray_setcap
 #define arrins dynarray_ins
 
+#endif /* SHEEP_DYNARRAY_NOSHORTHAND */
+
 #define dynarray_info(A) (((dynarray_info_t*)(A))-1)
 #define dynarray_new(T) ((T*)(_dynarray_new(sizeof(T))))
 #define dynarray_pop _dynarray_pop
 #define dynarray_push _dynarray_push
 #define dynarray_ins _dynarray_ins
 
-#ifndef SHEEP_DYNARRAY_NOSHORTHAND
 
 void   dynarray_del(void* a, size_t idx);
 void   dynarray_free(void* a);
@@ -144,7 +147,6 @@ void*  dynarray_setcap(void* a, size_t cpa);
 void*  _dynarray_new(size_t membsize);
 void*  dynarray_ensure_empty(void* a, size_t n);
 
-#endif /* SHEEP_DYNARRAY_NOSHORTHAND */
 
 #endif /* SHEEP_DYNARRAY_H */
 
@@ -160,19 +162,13 @@ void*  dynarray_ensure_empty(void* a, size_t n);
     } while(0)
 #define _dynarray_ins(A,idx,x) \
     do { \
-        if (idx == dynarray_len(A)) { \
-            dynarray_push(A, x); \
-        } \
-        else { \
-            dynarray_info_t *info = dynarray_info(A); \
-            A = dynarray_ensure_empty((A), 1); \
-            /* pointer arithmetic already multiply idx with membsize for us in dest and src */ \
-            memmove((A) + (idx+1), \
-                    (A) + (idx), \
-                    (info->length - (idx - 1)) * info->membsize); \
-            A[idx] = (x); \
-            info->length++; \
-        } \
+        A = dynarray_ensure_empty((A), 1); \
+        /* pointer arithmetic already multiply idx with membsize for us in dest and src */ \
+        memmove((A) + (idx+1), \
+                (A) + (idx), \
+                (dynarray_len(A) - idx) * dynarray_membsize(A)); \
+        A[idx] = (x); \
+        dynarray_info(A)->length++; \
     } while(0)
 
 void* dynarray_ensure_empty(void* a, size_t n) {
