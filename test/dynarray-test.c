@@ -102,6 +102,19 @@ START_TEST(arrins_test)
 }
 END_TEST
 
+START_TEST(arrsetlen_test)
+{
+    int *a = arrnew(int);
+    for (int i = 0; i < 1000; i++)
+        arrpush(a, i);
+    ck_assert_int_eq(arrlen(a), 1000);
+    arrsetlen(a, 500);
+    ck_assert_int_eq(arrlen(a), 500);
+    arrpush(a, -1);
+    ck_assert_int_eq(arrlen(a), 501);
+}
+END_TEST
+
 int main()
 {
     Suite *s1 = suite_create("Dynarray");
