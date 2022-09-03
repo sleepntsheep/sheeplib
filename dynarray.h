@@ -100,12 +100,8 @@
 #ifndef SHEEP_REALLOC
 #include <stdlib.h>
 #define SHEEP_REALLOC realloc
-#endif /* SHEEP_REALLOC
+#endif /* SHEEP_REALLOC */
 
-/*
- * dynarray - dynamic array using similar approach to stb_ds
- * not implemented yet
- * */
 typedef struct {
     size_t length;
     size_t capacity;
@@ -172,16 +168,16 @@ void*  dynarray_ensure_empty(void* a, size_t n);
 
 void* dynarray_ensure_empty(void* a, size_t n) {
     /* make sure space is empty enough for at least n more member */
-    dynarray_info_t *info = dynarray_info(a);
-    while (info->capacity - info->length < n)
-        info->capacity *= 2;
-    return dynarray_setcap(a, info->capacity);
+    size_t cap = dynarray_cap(a);
+    while (cap - dynarray_len(a) < n)
+        cap *= 2;
+    return dynarray_setcap(a, cap);
 }
 
 void dynarray_del(void* a, size_t idx) {
     dynarray_info_t *info = dynarray_info(a);
-    memmove(a + idx * info->membsize,
-            a + (idx+1) * info->membsize,
+    memmove((char*)a + (idx)   * info->membsize,
+            (char*)a + (idx+1) * info->membsize,
             (info->length - idx - 1) * info->membsize);
     info->length--;
 }
