@@ -12,6 +12,11 @@
  *      T* arr = dynarray_new(T);
  *      dynarray_push(arr, X);
  *
+ * If you want to use long 
+ * dynarray_fnc instead of arrfnc
+ * you can define SHEEP_DYNARRAY_NOSHORTHAND
+ * to avoid name collision
+ *
  * If you want to use custom alloactor,
  * define SHEEP_MALLOC and SHEEP_REALLOC to them
  * before including dynarray.h
@@ -127,6 +132,8 @@ typedef struct {
 #define dynarray_push _dynarray_push
 #define dynarray_ins _dynarray_ins
 
+#ifndef SHEEP_DYNARRAY_NOSHORTHAND
+
 void   dynarray_del(void* a, size_t idx);
 void   dynarray_free(void* a);
 size_t dynarray_len(void* a);
@@ -136,6 +143,8 @@ void   dynarray_setlen(void* a, size_t len);
 void*  dynarray_setcap(void* a, size_t cpa);
 void*  _dynarray_new(size_t membsize);
 void*  dynarray_ensure_empty(void* a, size_t n);
+
+#endif /* SHEEP_DYNARRAY_NOSHORTHAND */
 
 #endif /* SHEEP_DYNARRAY_H */
 
