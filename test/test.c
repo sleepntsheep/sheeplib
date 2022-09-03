@@ -150,6 +150,40 @@ describe(str) {
         asserteq(s.b, "");
         defer(free(s.b));
     }
+
+    it("strcat_test") {
+        str s = str_new();
+        str_cat(&s, "Hello");
+        asserteq(s.b, "Hello");
+        str_cat(&s, " World");
+        asserteq(s.b, "Hello World");
+        str_cat(&s, s);
+        asserteq(s.b, "Hello WorldHello World");
+    }
+
+    it("cstr_test") {
+        str s = cstr("Disaster");
+        asserteq(s.b, "Disaster");
+    }
+
+    it("str_dup") {
+        str s = cstr("String");
+        str *s2 = str_dup(s);
+        assertneq(s2, NULL);
+        asserteq(s2->b, s.b);
+    }
+
+    it("str_npush") {
+        str s = cstr("String");
+        str_npush(&s, "Padoru Padoru", 5);
+        asserteq(s.b, "StringPador");
+    }
+
+    it("str_aprintf") {
+        str *p = str_aprintf("%d, POOG", 500);
+        asserteq(p->b, "500, POOG");
+        asserteq_int(p->l, 9);
+    }
 }
 
 snow_main();
