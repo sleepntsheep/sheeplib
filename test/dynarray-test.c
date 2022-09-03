@@ -112,8 +112,42 @@ START_TEST(arrsetlen_test)
     ck_assert_int_eq(arrlen(a), 500);
     arrpush(a, -1);
     ck_assert_int_eq(arrlen(a), 501);
-}
-END_TEST
+    ck_assert_int_eq(a[500], -1);
+} END_TEST
+
+START_TEST(arrpop_test) {
+    int *a = arrnew(int);
+    arrpush(a, 1);
+    arrpush(a, 1);
+    arrpush(a, 1);
+    arrpush(a, 2);
+    arrpush(a, -1);
+    ck_assert_int_eq(arrpop(a), -1);
+    ck_assert_int_eq(arrpop(a), 2);
+    ck_assert_int_eq(arrpop(a), 1);
+    ck_assert_int_eq(arrpop(a), 1);
+    ck_assert_int_eq(arrpop(a), 1);
+    ck_assert_int_eq(arrpop(a), 0);
+    struct sa {int a, b;};
+    struct sa *sa = arrnew(struct sa);
+    struct sa temp = {1, 5};
+    arrpush(sa, temp);
+    arrpush(sa, ((struct sa){1, 5}));
+    ck_assert(arrpop(sa).a == 1);
+    ck_assert(arrpop(sa).b == 5);
+    arrfree(a);
+    arrfree(sa);
+} END_TEST
+
+START_TEST(arrmembsize_test) {
+    void *a = arrnew(int);
+    ck_assert_int_eq(dynarray_membsize(a), sizeof(int));
+    a = arrnew(long);
+    ck_assert_int_eq(dynarray_membsize(a), sizeof(long));
+    a = arrnew(char);
+    ck_assert_int_eq(dynarray_membsize(a), sizeof(char));
+
+} END_TEST
 
 int main()
 {
@@ -130,6 +164,9 @@ int main()
     tcase_add_test(tc, arrinfo_test);
     tcase_add_test(tc, arrdel_test);
     tcase_add_test(tc, arrins_test);
+    tcase_add_test(tc, arrsetlen_test);
+    tcase_add_test(tc, arrpop_test);
+    tcase_add_test(tc, arrmembsize_test);
 
     srunner_run_all(sr, CK_ENV);
     nf = srunner_ntests_failed(sr);
