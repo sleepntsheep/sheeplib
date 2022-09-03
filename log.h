@@ -1,3 +1,14 @@
+/* log.h - simple logging library - sleepntsheep 2022
+ * idea is that logging should be simple and easy, 
+ * here you put in argument just as how you would printf it
+ * panic(...) : log at panic level and abort
+ * warn(...) : log at warn level
+ * info(...) : log at info level
+ * the *err(...) counterpart of each function
+ * do the same thing except it call perror at the end 
+ * causing error from errno to be printed too
+ */
+
 #ifndef SHEEP_LOG_H
 #define SHEEP_LOG_H
 
@@ -114,7 +125,6 @@ _infoerr(const char *file, const int line,
     _sheep_va(__stderr_log("info", file, line, fmt, a));
     perror("");
 }
-
 
 #endif /* SHEEP_LOG_IMPLEMENTATION */
 

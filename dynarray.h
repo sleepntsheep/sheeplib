@@ -153,7 +153,7 @@ void*  dynarray_ensure_empty(void* a, size_t n);
 #ifdef SHEEP_DYNARRAY_IMPLEMENTATION 
 
 #define _dynarray_pop(A) \
-    (A)[dynarray_info(A)->length--]
+    (A)[--dynarray_info(A)->length]
 #define _dynarray_push(A,x) \
     do { \
         A = dynarray_ensure_empty((A), 1); \
