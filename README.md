@@ -1,7 +1,8 @@
 # sheeplib
 
 This repository is collection of my Single Header Library for C,
-None of these library depend on each other
+None of these library depend on each other except 
+str_split functions in str.h (they are optional)
 
 - log.h
     : nice interface for logging and debugging

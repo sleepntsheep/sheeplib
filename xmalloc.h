@@ -21,11 +21,10 @@ void *xrealloc(void *ptr, size_t size);
 #ifdef SHEEP_XMALLOC_IMPLEMENTATION
 
 #include <stdlib.h>
-#include "log.h"
 
 void *check_alloc(void *ptr) {
     if (ptr == NULL)
-        panic("allocation failed");
+        abort();
     return ptr;
 }
 
