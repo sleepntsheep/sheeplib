@@ -1,4 +1,4 @@
-/* dynarray.h - v0.01 - sleepntsheep 2022
+/* dynarray.h - v0.02 - sleepntsheep 2022
  * dynarray.h is single-header library for
  * nice dynamic array in C, similar to 
  * std::vector in C++ 
@@ -61,6 +61,9 @@
  *  arrpop(A) :
  *      remove last element of array A and return it
  *
+ *  arrtop(A) :
+ *      return last element of array, without removing it
+ *
  *  arrlen(A) :
  *      return length of array A
  *
@@ -85,12 +88,15 @@
  *      set capacity of array A to *at least* cap
  *      allocating more memory if needed
  *      *memory will be uninitialized
- *      
- * arrsort *won't* be implemented, just use qsort from stdlib
  *
+ * arrsort *won't* be implemented, just use qsort from stdlib
+ * this library *cannot* be used in C++,
+ * due to C++ not allowing C++ not allowing implicit pointer conversion
+ * you shouldn't use this in C++ anyway, use std::vector
  * */
 
 #pragma once
+
 #ifndef SHEEP_DYNARRAY_H
 #define SHEEP_DYNARRAY_H
 
@@ -107,7 +113,7 @@
 #define SHEEP_REALLOC realloc
 #endif /* SHEEP_REALLOC */
 
-typedef struct {
+typedef struct dynarray_info_s {
     size_t length;
     size_t capacity;
     size_t membsize;
@@ -123,6 +129,7 @@ typedef struct {
 #define arrcap dynarray_cap
 #define arrdel dynarray_del
 #define arrpop dynarray_pop
+#define arrtop dynarray_top
 #define arrpush dynarray_push
 #define arrsetlen dynarray_setlen
 #define arrsetcap dynarray_setcap
@@ -133,9 +140,9 @@ typedef struct {
 #define dynarray_info(A) (((dynarray_info_t*)(A))-1)
 #define dynarray_new(T) ((T*)(_dynarray_new(sizeof(T))))
 #define dynarray_pop _dynarray_pop
+#define dynarray_top _dynarray_top
 #define dynarray_push _dynarray_push
 #define dynarray_ins _dynarray_ins
-
 
 void   dynarray_del(void* a, size_t idx);
 void   dynarray_free(void* a);
@@ -152,6 +159,8 @@ void*  dynarray_ensure_empty(void* a, size_t n);
 
 #ifdef SHEEP_DYNARRAY_IMPLEMENTATION 
 
+#define _dynarray_top(A) \
+    (A)[dynarray_info(A)->length-1]
 #define _dynarray_pop(A) \
     (A)[--dynarray_info(A)->length]
 #define _dynarray_push(A,x) \

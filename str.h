@@ -1,4 +1,4 @@
-/* str.h - string library for C
+/* str.h - v0.01 - string library for C
  *
  * str_new()
  *   - create & return new empty str
@@ -35,6 +35,9 @@
  *     print the content to str and return it
  *     * while this is similar to GNU's asprintf,
  *     this implementation doesn't require GNU's compiler
+ *
+ * TODO :
+ *     be independent of string.h
  */
 
 #pragma once
@@ -89,9 +92,25 @@ struct str* str_split_cstr(struct str haystack, char* needle);
 
 #ifdef SHEEP_STR_IMPLEMENTATION
 #include <stdlib.h>
-#include <string.h>
 #include <stdarg.h>
+#include <string.h>
 #include <stdio.h>
+
+#ifndef sheep_strlen
+size_t sheep_strlen(char *s) {
+    size_t i = 0;
+    while (s[i])
+        i++;
+    return i;
+}
+#endif
+
+#ifndef sheep_strcpy
+char* sheep_strcpy(char *dest, const char *src) {
+    for (size_t i = 0; (dest[i] = src[i]) != '\0'; i++);
+    return dest;
+}
+#endif
 
 struct str
 str_new()
@@ -106,10 +125,10 @@ cstr(char* p)
 	struct str s = str_new();
 	if (p == NULL)
 		return s;
-	size_t len = strlen(p);
+	size_t len = sheep_strlen(p);
 	str_resize(&s, len+1);
 	s.l = len;
-	strcpy(s.b, p);
+	sheep_strcpy(s.b, p);
 	return s;
 }
 
@@ -117,9 +136,9 @@ struct str
 str_cat_str(struct str* s,
 		struct str n)
 {
-	if (s->l + n.l >= s->c)
+	if (!(s->l + n.l + 1 < s->c))
 		str_resize(s, s->l + n.l + 1);
-	strcpy(s->b + s->l, n.b);
+	sheep_strcpy(s->b + s->l, n.b);
 	s->l += n.l;
 	return *s;
 }
@@ -202,7 +221,7 @@ struct str* str_aprintf(const char* fmt, ...)
 	va_start(args, fmt);
 	vsnprintf(s->b, len, fmt, args);
 	va_end(args);
-    s->l = strlen(s->b);
+    s->l = sheep_strlen(s->b);
 	return s;
 }
 
@@ -210,9 +229,10 @@ struct str*
 str_dup(struct str s)
 {
     struct str* ret = calloc(1, sizeof(*ret));
-    ret->b = s.b;
-    ret->l = s.l;
     ret->c = s.c;
+    ret->l = s.l;
+    ret->b = malloc(ret->c);
+    sheep_strcpy(ret->b, s.b);
     return ret;
 }
 

@@ -4,6 +4,8 @@
 #include "../dynarray.h"
 #define SHEEP_STR_IMPLEMENTATION
 #include "../str.h"
+#define SHEEP_SMATH_IMPLEMENTATION
+#include "../smath.h"
 
 describe(dynarray) {
     it("new array") {
@@ -158,8 +160,13 @@ describe(str) {
         asserteq_str(s.b, "Hello");
         str_cat_cstr(&s, " World");
         asserteq_str(s.b, "Hello World");
+        str s2 = cstr("POG");
+        str_cat_str(&s, s2);
+        asserteq_str(s.b, "Hello WorldPOG");
+        /* undefined behaviour
         str_cat_str(&s, s);
         asserteq_str(s.b, "Hello WorldHello World");
+        */
     }
 
     it("cstr_test") {
@@ -186,6 +193,26 @@ describe(str) {
         asserteq_str(s.b, "String Catted");
         str_cat(&s, cstr(" Catted"));
         asserteq_str(s.b, "String Catted Catted");
+    }
+}
+
+describe(smath) {
+    it("mini maxi") {
+        asserteq_int(sheep_mini(5, 9), 5);
+        asserteq_int(sheep_maxi(5, 9), 9);
+        asserteq_int(sheep_mini(5, -9), -9);
+        asserteq_int(sheep_maxi(5, -9), 5);
+    }
+
+    it("minlf maxlf") {
+        asserteq_dbl(sheep_minlf(5.4L, 2.0L), 2.0L);
+        asserteq_dbl(sheep_minlf(5L, 1.0L/0.0L), 5L);
+        asserteq_dbl(sheep_maxlf(-.159, -.158), -.158);
+    }
+
+    it("minu maxu") {
+        asserteq_uint(sheep_minu(0, -1), 0);
+        asserteq_uint(sheep_maxu(0, 3000000000), 3000000000);
     }
 }
 
