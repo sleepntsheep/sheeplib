@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "snow.h"
 #define SHEEP_DYNARRAY_IMPLEMENTATION
 #include "../dynarray.h"
@@ -7,14 +8,14 @@
 describe(dynarray) {
     it("new array") {
         int *a = arrnew(int);
-        assertneq(a, NULL);
+        assert(a);
         defer(arrfree(a));
     }
 
     it("array info") {
         int *a = arrnew(int);
         dynarray_info_t *info = dynarray_info(a);
-        assertneq(info, NULL);
+        assert(info);
         asserteq_int(DYNARRAY_MIN_CAPACITY, info->capacity);
         asserteq_int(0, info->length);
         asserteq_int(sizeof(int), info->membsize);
@@ -147,44 +148,45 @@ describe(str) {
         asserteq_int(s.b[0], '\0');
         asserteq_int(s.l, 0);
         asserteq_int(s.c, SHEEP_STR_INIT_CAP);
-        asserteq(s.b, "");
+        asserteq_str(s.b, "");
         defer(free(s.b));
     }
 
     it("strcat_test") {
         str s = str_new();
-        str_cat(&s, "Hello");
-        asserteq(s.b, "Hello");
-        str_cat(&s, " World");
-        asserteq(s.b, "Hello World");
-        str_cat(&s, s);
-        asserteq(s.b, "Hello WorldHello World");
+        str_cat_cstr(&s, "Hello");
+        asserteq_str(s.b, "Hello");
+        str_cat_cstr(&s, " World");
+        asserteq_str(s.b, "Hello World");
+        str_cat_str(&s, s);
+        asserteq_str(s.b, "Hello WorldHello World");
     }
 
     it("cstr_test") {
         str s = cstr("Disaster");
-        asserteq(s.b, "Disaster");
+        asserteq_str(s.b, "Disaster");
     }
 
     it("str_dup") {
         str s = cstr("String");
         str *s2 = str_dup(s);
-        assertneq(s2, NULL);
-        asserteq(s2->b, s.b);
-    }
-
-    it("str_npush") {
-        str s = cstr("String");
-        str_npush(&s, "Padoru Padoru", 5);
-        asserteq(s.b, "StringPador");
+        assert(s2);
+        asserteq_str(s2->b, s.b);
     }
 
     it("str_aprintf") {
         str *p = str_aprintf("%d, POOG", 500);
-        asserteq(p->b, "500, POOG");
+        asserteq_str(p->b, "500, POOG");
         asserteq_int(p->l, 9);
+    }
+
+    it("_Generic str_cat") {
+        str s = cstr("String");
+        str_cat(&s, " Catted");
+        asserteq_str(s.b, "String Catted");
+        str_cat(&s, cstr(" Catted"));
+        asserteq_str(s.b, "String Catted Catted");
     }
 }
 
 snow_main();
-

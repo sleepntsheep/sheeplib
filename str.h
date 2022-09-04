@@ -1,3 +1,42 @@
+/* str.h - string library for C
+ *
+ * str_new()
+ *   - create & return new empty str
+ * 
+ * cstr(char*p)
+ *   - take in char* string and return str with same content
+ *
+ * str_cat_str(str *s, str s2)
+ *   - take in pointer of first string and concat second str to it
+ *      returning the pointer of concat-ed string
+ *
+ * str_cat_cstr(str *s, char *p)
+ *   - like str_cat_str(s, cstr(p))
+ *
+ * str_cat(str *s, str | char *)
+ *   - _Generic macro that accept both char* and str as 
+ *   second parameter, only available in C11 and above
+ *
+ * str_dup(str s)
+ *   - return new allocated str and copy the content of s to it
+ *  
+ * str_free(str *s)
+ *   - free strs allocated by str_dup
+ *
+ * str_resize(str *s, size_t size)
+ *   - take pointer of str s, 
+ *     resize str s to size, returning same pointer
+ * 
+ * - sleepntsheep 2022
+ *
+ * str_aprintf(const char *fmt, ...)
+ *   - take in printf-style format and variadic arguments
+ *     allocate str large enough for it
+ *     print the content to str and return it
+ *     * while this is similar to GNU's asprintf,
+ *     this implementation doesn't require GNU's compiler
+ */
+
 #pragma once
 #ifndef SHEEP_STR_H
 #define SHEEP_STR_H
@@ -23,14 +62,25 @@ struct str* str_aprintf(const char* fmt, ...);
 
 #define SHEEP_STR_INIT_CAP 512
 
-#ifdef SHEEP_DYNARRAY_H
-#if __STDC_VERSION__ == 201112L
-#define str_split(a,b) \
+#if __STDC_VERSION__ >= 201112L
+#define str_cat(a,b) \
 	_Generic((b), \
-		struct str: str_split_str, \
-		default: str_split_cstr \
+		struct str: str_cat_str, \
+		default: str_cat_cstr \
 	)(a,b)
 #endif
+
+
+#ifdef SHEEP_DYNARRAY_H
+
+#if __STDC_VERSION__ >= 201112L
+#define str_split(a,b) \
+_Generic((b), \
+    struct str: str_split_str, \
+    default: str_split_cstr \
+)(a,b)
+#endif
+
 struct str* str_split_str(struct str haystack, struct str needle);
 struct str* str_split_cstr(struct str haystack, char* needle);
 #endif /* SHEEP_DYNARRAY_H */
@@ -63,14 +113,6 @@ cstr(char* p)
 	return s;
 }
 
-#if __STDC_VERSION__ == 201112L
-#define str_cat(a,b) \
-	_Generic((b), \
-		struct str: str_cat_str, \
-		default: str_cat_cstr \
-	)(a,b)
-#endif
-
 struct str
 str_cat_str(struct str* s,
 		struct str n)
@@ -89,23 +131,13 @@ str_cat_cstr(struct str* s,
 	return str_cat_str(s, cstr(n));
 }
 
-struct str *str_npush(struct str *s, char* n, size_t len)
-{
-	if (s->l + len >= s->c)
-		str_resize(s, s->l + len + 1);
-	strncpy(s->b + s->l, n, len);
-	s->l += len;
-	s->b[s->l] = 0;
-	return s;
-}
-
 #ifdef SHEEP_DYNARRAY_H
 
 struct str*
 str_split_str(struct str haystack,
 	struct str needle)
 {
-	struct str* arr = NULL;
+	struct str* arr = arrnew(struct str);
 	long off = 0;
 	long linelen = 0;
 	for (;;)
@@ -115,9 +147,8 @@ str_split_str(struct str haystack,
 		if (ch == NULL)
 			break;
 		linelen = ch - sp;
-		struct str line = str_npush(str_new(), sp, linelen);
-        str_cat(&line, ""); // nil terminator
-		arrput(arr, line);
+        sp[linelen] = 0;
+		arrpush(arr, cstr(sp));
 		off += linelen + needle.l;
 	}
 	return arr;

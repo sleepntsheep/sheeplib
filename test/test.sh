@@ -4,6 +4,6 @@ rm -rf bin
 mkdir -p bin
 for f in *.c
 do
-    gcc "$f" -o "./bin/$f.out"  -DSNOW_ENABLED -lcheck
+    clang "$f" -o "./bin/$f.out"  -DSNOW_ENABLED -std=c11
     "./bin/$f.out"
 done
