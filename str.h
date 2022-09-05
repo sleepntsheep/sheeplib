@@ -27,7 +27,6 @@
  *   - take pointer of str s, 
  *     resize str s to size, returning same pointer
  * 
- * - sleepntsheep 2022
  *
  * str_aprintf(const char *fmt, ...)
  *   - take in printf-style format and variadic arguments
@@ -35,6 +34,8 @@
  *     print the content to str and return it
  *     * while this is similar to GNU's asprintf,
  *     this implementation doesn't require GNU's compiler
+ *
+ * - sleepntsheep 2022
  *
  * TODO :
  *     be independent of string.h
@@ -50,8 +51,8 @@
 typedef struct str str;
 struct str
 {
-	char* b; // buffer
-	size_t c, l; // capacity, length
+	char* b; /* buffer */
+	size_t c, l; /* capacity, length */
 };
 
 struct str str_new();
@@ -107,7 +108,9 @@ size_t sheep_strlen(char *s) {
 
 #ifndef sheep_strcpy
 char* sheep_strcpy(char *dest, const char *src) {
-    for (size_t i = 0; (dest[i] = src[i]) != '\0'; i++);
+	size_t i = 0;
+	while (dest[i] = src[i])
+		i++;
     return dest;
 }
 #endif

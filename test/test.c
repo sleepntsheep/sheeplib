@@ -171,6 +171,7 @@ int main() {
         assert(p->l == 9);
     }
 
+#if __STD_C_VERSION__ >= 201112L
     it(_Generic str_cat) {
         str s = cstr("String");
         str_cat(&s, " Catted");
@@ -178,4 +179,5 @@ int main() {
         str_cat(&s, cstr(" Catted"));
         assert(!strcmp(s.b, "String Catted Catted"));
     }
+#endif
 }
