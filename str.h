@@ -109,7 +109,7 @@ size_t sheep_strlen(char *s) {
 #ifndef sheep_strcpy
 char* sheep_strcpy(char *dest, const char *src) {
 	size_t i = 0;
-	while (dest[i] = src[i])
+	while ((dest[i] = src[i]))
 		i++;
     return dest;
 }
@@ -216,9 +216,10 @@ __sprintf_sz(const char* fmt, ...)
 
 struct str* str_aprintf(const char* fmt, ...)
 {
+    size_t len;
 	va_list args;
 	va_start(args, fmt);
-	size_t len = __sprintf_sz(fmt, args);
+	len = __sprintf_sz(fmt, args);
 	va_end(args);
 	struct str *s = str_resize(str_dup(str_new()), len);
 	va_start(args, fmt);

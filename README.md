@@ -14,6 +14,9 @@ str_split functions in str.h (they are optional)
     front of array containing information
     about the dynarray
 
+- ssort.h 
+    : (sheep_qsort) drop in qsort replacement
+
 - xmalloc.h 
     : just normal x-wrapper function,
     which might bec considered harmful by many
