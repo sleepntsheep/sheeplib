@@ -49,8 +49,9 @@ you will need to define SHEEP_HEADER_IMPLEMENTATION before using it
 for further information, read the document in header file itself
 
 # notes:
-    the .c files are just there for building as shared library,
-    you only need the .h file if you want to use this as single header library
+
+the .c files are just there for building as shared library,
+you only need the .h file if you want to use this as single header library
 
 # instructions
 
