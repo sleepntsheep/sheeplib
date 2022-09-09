@@ -107,9 +107,9 @@ void        str_resize(struct str* s, size_t newsz);
 void        str_advance(struct str* s, size_t n);
 struct str *str_aprintf(const char* fmt, ...);
 
-#define str_cmpc(a, p) str_cmp(a, str_from_c(p))
-#define str_catc(a, p) str_cat(a, str_from_c(p))
-#define str_find_subc(a, p) str_find_sub(a, str_from_c(p))
+#define str_cmpc(a, p) str_cmp(a, str_from_copy_c(p))
+#define str_catc(a, p) str_cat(a, str_from_copy_c(p))
+#define str_find_subc(a, p) str_find_sub(a, str_from_copy_c(p))
 
 #define SHEEP_STR_INIT_CAP 512
 
@@ -225,9 +225,8 @@ int str_cmp(struct str a, struct str b)
 
 void str_cat(struct str *s, struct str n)
 {
-	if (!(s->l + n.l + 1 < s->c)) {
-		str_resize(&s, s->l + n.l + 1);
-        s->l += n.l + 1;
+	if (s->l + n.l + 1 >= s->c) {
+		str_resize(s, s->l + n.l + 1);
     }
 	sheep_strcpy(s->b + s->l, n.b);
 	s->l += n.l;
