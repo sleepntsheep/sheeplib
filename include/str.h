@@ -114,7 +114,7 @@ struct str *str_aprintf(const char* fmt, ...);
 #define SHEEP_STR_INIT_CAP 512
 
 struct strarray str_split(struct str s, struct str delim);
-#define str_split_c(s, delim) str_split(s, str_from_copy_c(delim))
+#define str_splitc(s, delim) str_split(s, str_from_copy_c(delim))
 
 struct strarray strarray_new();
 void strarray_push(struct strarray *a, struct str s);

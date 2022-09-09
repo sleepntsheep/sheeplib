@@ -248,6 +248,55 @@ int main() {
         assert(p->l == 9);
     } ti
 
+    it(str_find_sub) {
+        str s = str_from_c("POOOOG");
+        assert(str_find_subc(s, "OOO") == 1);
+        assert(str_find_subc(s, "POOO") == 0);
+        str d = str_from_c("ABCDEFEF");
+        assert(str_find_subc(d, "ABCDEFEF") == 0);
+        assert(str_find_subc(d, "ABCDEFE") == 0);
+        assert(str_find_subc(d, "ABCDEF") == 0);
+        assert(str_find_subc(d, "ABCDE") == 0);
+        assert(str_find_subc(d, "ABCD") == 0);
+        assert(str_find_subc(d, "ABC") == 0);
+        assert(str_find_subc(d, "AB") == 0);
+        assert(str_find_subc(d, "A") == 0);
+        assert(str_find_subc(d, "BCDEFEF") == 1);
+        assert(str_find_subc(d, "BCDEFE") == 1);
+        assert(str_find_subc(d, "BCDEF") == 1);
+        assert(str_find_subc(d, "BCDE") == 1);
+        assert(str_find_subc(d, "BCD") == 1);
+        assert(str_find_subc(d, "BC") == 1);
+        assert(str_find_subc(d, "B") == 1);
+        assert(str_find_subc(d, "CDEFEF") == 2);
+        assert(str_find_subc(d, "CDEFE") == 2);
+        assert(str_find_subc(d, "CDEF") == 2);
+        assert(str_find_subc(d, "CDE") == 2);
+        assert(str_find_subc(d, "CD") == 2);
+        assert(str_find_subc(d, "C") == 2);
+        assert(str_find_subc(d, "DEFEF") == 3);
+        assert(str_find_subc(d, "DEFE") == 3);
+        assert(str_find_subc(d, "DEF") == 3);
+        assert(str_find_subc(d, "DE") == 3);
+        assert(str_find_subc(d, "D") == 3);
+        assert(str_find_subc(d, "EFEF") == 4);
+        assert(str_find_subc(d, "EFE") == 4);
+        assert(str_find_subc(d, "EF") == 4);
+        assert(str_find_subc(d, "E") == 4);
+        assert(str_find_subc(d, "FEF") == 5);
+        assert(str_find_subc(d, "Z") == -1);
+    } ti
+
+    it(str_split) {
+        str h = str_from_c("Welcome\nTo\nFarm");
+        str n = str_from_c("\n");
+        struct strarray sp = str_split(h, n);
+        assert(sp.l == 3);
+        assert(!str_cmpc(sp.a[0], "Welcome"));
+        assert(!str_cmpc(sp.a[1], "To"));
+        assert(!str_cmpc(sp.a[2], "Farm"));
+    } ti
+
 #if __STD_C_VERSION__ >= 201112L
     it(_Generic str_cat) {
         str s = c("String");
