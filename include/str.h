@@ -102,7 +102,7 @@ struct str  str_substr(struct str str, size_t start, size_t end);
 int         str_cmp(struct str a, struct str b);
 size_t      str_find_sub(struct str haystack, struct str needle);
 struct str *str_dup(struct str s);
-struct str  str_cat(struct str* s, struct str n);
+void        str_cat(struct str* s, struct str n);
 void        str_resize(struct str* s, size_t newsz);
 void        str_advance(struct str* s, size_t n);
 struct str *str_aprintf(const char* fmt, ...);
@@ -162,6 +162,7 @@ struct str str_from_c(char* p)
 	struct str s = { 0 }; 
 	if (p == NULL)
 		return s;
+    s.c = len + 1;
     s.l = s.c = len;
     s.b = p;
 	return s;
@@ -222,13 +223,14 @@ int str_cmp(struct str a, struct str b)
     return 0;
 }
 
-struct str str_cat(struct str *s, struct str n)
+void str_cat(struct str *s, struct str n)
 {
-	if (!(s->l + n.l + 1 < s->c))
-		str_resize(s, s->l + n.l + 1);
+	if (!(s->l + n.l + 1 < s->c)) {
+		str_resize(&s, s->l + n.l + 1);
+        s->l += n.l + 1;
+    }
 	sheep_strcpy(s->b + s->l, n.b);
 	s->l += n.l;
-	return *s;
 }
 
 size_t str_find_sub(struct str haystack, struct str needle)
@@ -260,8 +262,7 @@ void str_resize(struct str* s, size_t newsz)
         s->b = malloc(newsz);
     else if (newsz > s->c)
 		s->b = realloc(s->b, newsz);
-	else if (newsz < s->l)
-		s->b[s->l = newsz] = 0;
+    s->b[newsz] = '\0';
     s->c = newsz;
 }
 

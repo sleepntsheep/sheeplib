@@ -213,6 +213,7 @@ int main() {
 
     it (str_cmp) {
         str s = str_from_c("Paper Machine");
+        assert(str_cmp(s, s) == 0);
         assert(str_cmp(s, str_from_c("Paper Machine")) == 0);
         assert(str_cmpc(s, "AAAAAAAAAAAAAAAA") < 0);
         assert(str_cmpc(s, "ZZZZZZZZZZZZZZZZ") < 0);
@@ -223,8 +224,9 @@ int main() {
         char *p = malloc(1000);
         strcpy(p, "Dynamic String");
         struct str s = str_from_copy_c(p);
-        free(p);
         assert(!strcmp(s.b, "Dynamic String"));
+        assert(!str_cmpc(str_from_c(p), "Dynamic String"));
+        free(p);
         assert(!str_cmpc(s, "Dynamic String"));
     } ti
 
