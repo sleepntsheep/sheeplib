@@ -18,7 +18,7 @@
  * to avoid name collision
  *
  * If you want to use custom alloactor,
- * define SHEEP_MALLOC and SHEEP_REALLOC to them
+ * define malloc and realloc to them
  * before including dynarray.h
  *
  * How it works
@@ -102,16 +102,7 @@
 
 #include <string.h>
 #include <stddef.h>
-
-#ifndef SHEEP_MALLOC
 #include <stdlib.h>
-#define SHEEP_MALLOC malloc
-#endif /* SHEEP_MALLOC */
-
-#ifndef SHEEP_REALLOC
-#include <stdlib.h>
-#define SHEEP_REALLOC realloc
-#endif /* SHEEP_REALLOC */
 
 typedef struct dynarray_info_s {
     size_t length;
@@ -150,9 +141,9 @@ size_t dynarray_len(void* a);
 size_t dynarray_cap(void* a);
 size_t dynarray_membsize(void *a);
 void   dynarray_setlen(void* a, size_t len);
-void*  dynarray_setcap(void* a, size_t cpa);
-void*  _dynarray_new(size_t membsize);
-void*  dynarray_ensure_empty(void* a, size_t n);
+void  *dynarray_setcap(void* a, size_t cpa);
+void  *_dynarray_new(size_t membsize);
+void  *dynarray_ensure_empty(void* a, size_t n);
 
 
 #endif /* SHEEP_DYNARRAY_H */
@@ -183,7 +174,7 @@ void*  dynarray_ensure_empty(void* a, size_t n);
         dynarray_info(A)->length++; \
     } while(0)
 
-void* dynarray_ensure_empty(void* a, size_t n) {
+void *dynarray_ensure_empty(void* a, size_t n) {
     /* make sure space is empty enough for at least n more member */
     size_t cap = dynarray_cap(a);
     while (cap - dynarray_len(a) < n)
@@ -231,7 +222,7 @@ void* dynarray_setcap(void* a, size_t cap) {
     if (cap <= dynarray_cap(a))
         return a;
     void *b = ((dynarray_info_t*)
-            SHEEP_REALLOC(dynarray_info(a), sizeof(dynarray_info_t) +
+            realloc(dynarray_info(a), sizeof(dynarray_info_t) +
             cap * dynarray_membsize(a)))+1;
     dynarray_info(b)->capacity = cap;
     return b;
@@ -240,7 +231,7 @@ void* dynarray_setcap(void* a, size_t cap) {
 void* _dynarray_new(size_t membsize) {
     /* initialize a new dynarray */
     dynarray_info_t* a;
-    a = SHEEP_MALLOC(sizeof(dynarray_info_t) + membsize * DYNARRAY_MIN_CAPACITY);
+    a = malloc(sizeof(dynarray_info_t) + membsize * DYNARRAY_MIN_CAPACITY);
     a->length = 0;
     a->capacity = 4; //DYNARRAY_MIN_CAPACITY;
     a->membsize = membsize;

@@ -66,7 +66,7 @@ _infoerr(const char *file, const int line,
         va_list a; \
         va_start(a, fmt); \
         x; \
-        va_end(a); 
+        va_end(a)
 
 void
 __stderr_log(const char *type, const char *file

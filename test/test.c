@@ -299,16 +299,6 @@ int main() {
         assert(!str_cmpc(sp.a[2], "Farm"));
     } ti
 
-#if __STD_C_VERSION__ >= 201112L
-    it(_Generic str_cat) {
-        str s = c("String");
-        str_cat(&s, " Catted");
-        assert(!strcmp(s.b, "String Catted"));
-        str_cat(&s, c(" Catted"));
-        assert(!strcmp(s.b, "String Catted Catted"));
-    } ti
-#endif
-
     /* mustn't take no more than O(nlogn) */
     {
         size_t j, n = 1000000;
@@ -323,26 +313,30 @@ int main() {
     }
 
     {
-        int n = 10000000, i;
+        int n = 1000000, i;
         a = arrnew(int);
         for (i = 0; i < n; i++)
             arrpush(a, i);
-        int key = 10;
         it(sbsearch) {
-            int *ten = sbsearch(&key, a, n, sizeof(int), cmpfnc);
-            assert(*ten == 10);
-            assert(ten - a == 10);
+            for (size_t i = 0; i < n; i++) {
+                int *br = sbsearch(&i, a, n, sizeof(int), cmpfnc);
+                assert(*br == i);
+                assert(br - a == i);
+            }
         } ti
-        key = 18;
         it(supperbound) {
-            int *up = supperbound(&key, a, n, sizeof(int), cmpfnc);
-            assert(*up > 18);
-            assert(up - a == 19);
+            for (size_t i = 0; i < n - 1; i++) {
+                int *up = supperbound(&i, a, n, sizeof(int), cmpfnc);
+                assert(*up > i);
+                assert(up - a == i + 1);
+            }
         } ti
         it(slowerbound) {
-            int *low = slowerbound(&key, a, n, sizeof(int), cmpfnc);
-            assert(*low == 18);
-            assert(low - a == 18);
+            for (size_t i = 0; i < n; i++) {
+                int *low = slowerbound(&i, a, n, sizeof(int), cmpfnc);
+                assert(*low == i);
+                assert(low - a == i);
+            }
         } ti
     }
 }

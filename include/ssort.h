@@ -101,12 +101,12 @@ void sheep_qsort(void *base, size_t nmemb,
 
 void *sheep_bsearch(void *key, void *base, size_t nmemb,
         size_t size, int (*cmpfnc)(const void *, const void *)) {
-    size_t l, r;
+    long l, r;
     int cmp;
     l = 0;
     r = nmemb - 1;
     while (l <= r) {
-        size_t m = l + (r - l) / 2;
+        long m = l + (r - l) / 2;
         void *cur = (char*) base + m * size;
         cmp = cmpfnc(cur, key);
         if (cmp < 0)
@@ -121,13 +121,13 @@ void *sheep_bsearch(void *key, void *base, size_t nmemb,
 
 void *sheep_upperbound(void *key, void *base, size_t nmemb,
         size_t size, int (*cmpfnc)(const void *, const void *)) {
-    size_t l, r;
+    long l, r;
     int cmp;
     void *result = NULL;
     l = 0;
     r = nmemb - 1;
     while (l <= r) {
-        size_t m = l + (r - l) / 2;
+        long m = l + (r - l) / 2;
         void *cur = (char*) base + m * size;
         cmp = cmpfnc(cur, key);
         if (cmp <= 0) {
@@ -142,13 +142,13 @@ void *sheep_upperbound(void *key, void *base, size_t nmemb,
 
 void *sheep_lowerbound(void *key, void *base, size_t nmemb,
         size_t size, int (*cmpfnc)(const void *, const void *)) {
-    size_t l, r;
+    long l, r;
     int cmp;
     void *result = NULL;
     l = 0;
     r = nmemb - 1;
     while (l <= r) {
-        size_t m = l + (r - l) / 2;
+        long m = l + (r - l) / 2;
         void *cur = (char*) base + m * size;
         cmp = cmpfnc(cur, key);
         if (cmp < 0) {
