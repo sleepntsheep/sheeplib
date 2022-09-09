@@ -259,9 +259,10 @@ void str_resize(struct str* s, size_t newsz)
 {
     if (s->b == NULL)
         s->b = malloc(newsz);
-    else if (newsz > s->c)
+    else if (newsz > s->c) {
 		s->b = realloc(s->b, newsz);
-    s->b[newsz] = '\0';
+        s->b[newsz] = '\0';
+    }
     s->c = newsz;
 }
 

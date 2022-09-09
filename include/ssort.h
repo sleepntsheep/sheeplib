@@ -120,8 +120,7 @@ void *sheep_bsearch(void *key, void *base, size_t nmemb,
 }
 
 void *sheep_upperbound(void *key, void *base, size_t nmemb,
-        size_t size, int (*cmpfnc)(const void *, const void *)) {
-    long l, r;
+        size_t size, int (*cmpfnc)(const void *, const void *)) { long l, r;
     int cmp;
     void *result = NULL;
     l = 0;

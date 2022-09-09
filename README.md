@@ -59,7 +59,6 @@ these are single header library, just copy it to your project.
 and read the comments in the library for further instructions.
 
 you don't need any specific unit test library, just C99 compiler
+and run test.c
 
-    cd test
-    ./test.sh
 

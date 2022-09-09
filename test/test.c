@@ -1,3 +1,5 @@
+//usr/bin/clang "$0" && exec ./a.out "$@"
+
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
@@ -324,6 +326,8 @@ int main() {
                 assert(br - a == i);
             }
         } ti
+        i = -1;
+        assert(sbsearch(&i, a, n, sizeof(int), cmpfnc) == NULL);
         it(supperbound) {
             for (size_t i = 0; i < n - 1; i++) {
                 int *up = supperbound(&i, a, n, sizeof(int), cmpfnc);
@@ -331,6 +335,8 @@ int main() {
                 assert(up - a == i + 1);
             }
         } ti
+        i = 2e9;
+        assert(supperbound(&i, a, n, sizeof(int), cmpfnc) == NULL);
         it(slowerbound) {
             for (size_t i = 0; i < n; i++) {
                 int *low = slowerbound(&i, a, n, sizeof(int), cmpfnc);
@@ -338,5 +344,6 @@ int main() {
                 assert(low - a == i);
             }
         } ti
+        assert(slowerbound(&i, a, n, sizeof(int), cmpfnc) == NULL);
     }
 }
