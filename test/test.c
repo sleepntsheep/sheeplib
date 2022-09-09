@@ -2,11 +2,11 @@
 #include <time.h>
 #include <stdlib.h>
 #define SHEEP_DYNARRAY_IMPLEMENTATION
-#include "../dynarray.h"
+#include "../include/dynarray.h"
 #define SHEEP_STR_IMPLEMENTATION
-#include "../str.h"
+#include "../include/str.h"
 #define SHEEP_SSORT_IMPLEMENTATION
-#include "../ssort.h"
+#include "../include/ssort.h"
 
 #undef assert
 #define assert(chk) \

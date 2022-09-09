@@ -45,6 +45,7 @@ void *sheep_lowerbound(void *key, void *base, size_t nmemb,
 #endif /* SHEEP_SSORT_H */
 
 #ifdef SHEEP_SSORT_IMPLEMENTATION
+#include <string.h>
 
 void sheep_qsort_merge(char *base, size_t left,
         size_t mid, size_t right, size_t size,

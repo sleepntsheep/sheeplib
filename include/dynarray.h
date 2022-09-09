@@ -171,6 +171,7 @@ void*  dynarray_ensure_empty(void* a, size_t n);
         (A)[arrlen(A)] = (x); \
         dynarray_info(A)->length++; \
     } while(0)
+
 #define _dynarray_ins(A,idx,x) \
     do { \
         A = dynarray_ensure_empty((A), 1); \
