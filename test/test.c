@@ -7,18 +7,20 @@
 #include "../str.h"
 #define SHEEP_SSORT_IMPLEMENTATION
 #include "../ssort.h"
+
 #undef assert
 #define assert(chk) \
-    do \
+    do { \
         if (!(chk)) \
             fprintf(stderr, "Assertion (%s) failed %s at line %d \n ", #chk, __FILE__,__LINE__); \
-    while (0)
+    } while (0)
 
 clock_t start;
 
 #define it(a) \
     start = clock(); \
-    printf("%s \t\t\t", #a); \
+    printf("%s \n\t", #a); \
+    fflush(stdout);
 
 #define ti \
     printf("time taken %ld (cpu time)\n", (clock() - start));
@@ -28,7 +30,7 @@ int *a;
 void rndarr(int size) {
     int i;
     for (i = 0; i < arrlen(a); i++)
-        arrpop(a);
+         arrpop(a);
     for (i = 0; i < size; i++) {
         int b = rand() % 65531;
         arrpush(a, b);
@@ -166,7 +168,7 @@ int main() {
         assert(dynarray_membsize(a) == sizeof(char));
     } ti
 
-    it(strnew_test) {
+    it(strnewalloc_test) {
         str s = str_new();
         assert(s.b[0] == '\0');
         assert(s.l == 0);
@@ -176,28 +178,67 @@ int main() {
 
     it(strcat_test) {
         str s = str_new();
-        str s2 = cstr("POG");
-        str_cat_cstr(&s, "Hello");
+        str s2 = str_from_c("POG");
+        str_catc(&s, "Hello");
         assert(!strcmp(s.b, "Hello"));
-        str_cat_cstr(&s, " World");
+        str_catc(&s, " World");
         assert(!strcmp(s.b, "Hello World"));
-        str_cat_str(&s, s2);
+        str_cat(&s, s2);
         assert(!strcmp(s.b, "Hello WorldPOG"));
         /* undefined behaviour
-        str_cat_str(&s, s);
+        str_cat(&s, s);
         assert(!strcmp(s.b, "Hello WorldHello World"));
         */
     } ti
 
-    it(cstr_test) {
-        str s = cstr("Disaster");
+    it(str_from_c) {
+        str s = str_from_c("Disaster");
         assert(!strcmp(s.b, "Disaster"));
     } ti
 
+    it(str_from_cn) {
+        str s = str_from_cn("Disaster", 5);
+        assert(str_cmpc(s, "Disas") == 0);
+        assert(!strcmp(s.b, "Disas"));
+        assert(s.l == 5);
+    } ti
+
+    it (str_substr) {
+        str s = str_from_c("Paper Machine");
+        str sub = str_substr(s, 4, 8);
+        assert(sub.l == 5);
+        assert(!strcmp(sub.b, "r Mac"));
+        assert(!str_cmpc(sub, "r Mac"));
+    } ti 
+
+    it (str_cmp) {
+        str s = str_from_c("Paper Machine");
+        assert(str_cmp(s, str_from_c("Paper Machine")) == 0);
+        assert(str_cmpc(s, "AAAAAAAAAAAAAAAA") < 0);
+        assert(str_cmpc(s, "ZZZZZZZZZZZZZZZZ") < 0);
+        assert(str_cmpc(s, "AAAAAAAAA") > 0);
+    } ti
+
+    it (str_from_copy_c) {
+        char *p = malloc(1000);
+        strcpy(p, "Dynamic String");
+        struct str s = str_from_copy_c(p);
+        free(p);
+        assert(!strcmp(s.b, "Dynamic String"));
+        assert(!str_cmpc(s, "Dynamic String"));
+    } ti
+
+    it (str_cmp) {
+        struct str s = str_from_c ("POG Duck Duck");
+        struct str s2 = str_from_c("Duck POG POG");
+        assert(str_cmp(s, s2) > 0);
+    } ti
+
     it(str_dup) {
-        str s = cstr("String");
+        str s = str_from_c("String");
         str *s2 = str_dup(s);
         assert(s2);
+        assert(s2->b == s.b);
         assert(!strcmp(s2->b, s.b));
     } ti
 
@@ -209,24 +250,48 @@ int main() {
 
 #if __STD_C_VERSION__ >= 201112L
     it(_Generic str_cat) {
-        str s = cstr("String");
+        str s = c("String");
         str_cat(&s, " Catted");
         assert(!strcmp(s.b, "String Catted"));
-        str_cat(&s, cstr(" Catted"));
+        str_cat(&s, c(" Catted"));
         assert(!strcmp(s.b, "String Catted Catted"));
     } ti
 #endif
 
     /* mustn't take no more than O(nlogn) */
-	it(qsort) {
-        int i, j;
+    {
+        size_t j, n = 1000000;
         srand(time(NULL));
-        for (i = 1; i < 3000; i++) {
-            a = arrnew(int);
-            rndarr(i);
-            sheep_qsort(a, i, sizeof *a, cmpfnc);
-            for (j = 0; j < i - 1; j++)
+        a = arrnew(int);
+        rndarr(n);
+        it(ssort) {
+            ssort(a, n, sizeof *a, cmpfnc);
+            for (j = 0; j < n - 1; j++)
                 assert(a[j] <= a[j+1]);
-        }
-	} ti
+        } ti
+    }
+
+    {
+        int n = 10000000, i;
+        a = arrnew(int);
+        for (i = 0; i < n; i++)
+            arrpush(a, i);
+        int key = 10;
+        it(sbsearch) {
+            int *ten = sbsearch(&key, a, n, sizeof(int), cmpfnc);
+            assert(*ten == 10);
+            assert(ten - a == 10);
+        } ti
+        key = 18;
+        it(supperbound) {
+            int *up = supperbound(&key, a, n, sizeof(int), cmpfnc);
+            assert(*up > 18);
+            assert(up - a == 19);
+        } ti
+        it(slowerbound) {
+            int *low = slowerbound(&key, a, n, sizeof(int), cmpfnc);
+            assert(*low == 18);
+            assert(low - a == 18);
+        } ti
+    }
 }

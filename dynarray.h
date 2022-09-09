@@ -161,8 +161,10 @@ void*  dynarray_ensure_empty(void* a, size_t n);
 
 #define _dynarray_top(A) \
     (A)[dynarray_info(A)->length-1]
+
 #define _dynarray_pop(A) \
     (A)[--dynarray_info(A)->length]
+
 #define _dynarray_push(A,x) \
     do { \
         A = dynarray_ensure_empty((A), 1); \
