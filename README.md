@@ -40,7 +40,7 @@ To install shared library, use cmake
 
 # usage:
 
-you will need to define SHEEP_<HEADER>_IMPLEMENTATION before using it
+you will need to define SHEEP_HEADER_IMPLEMENTATION before using it
 (this applys even if you are using shared library)
 
     #define SHEEP_SSORT_IMPLEMENTATION
