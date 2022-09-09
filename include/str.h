@@ -25,6 +25,7 @@
  *   - allocate str and copy the content of s to it
  *     return pointer to the the new string 
  *     notes: this * does not * copy the char array buffer
+ *     to copy buffer too, use str_substr(s, 0, s.l-1)
  *  
  * str_resize(str *s, size_t size)
  *   - take pointer of str s, 
@@ -49,8 +50,11 @@
  *     from index start to end
  *
  * str_find_sub(str haystack, str needle)
- *   - return index to needle in haystack if found
+ *   - return index to first needle in haystack if found
  *     if not found, return -1
+ *
+ * str_advance(str *s, size_t n)
+ *   - advance buffer pointer by n byte, reducing length by n
  *
  * Notes: 
  *     in order to maintain compatibility with 
@@ -82,24 +86,26 @@ struct str
 	size_t c, l; /* capacity, length */
 };
 
+typedef struct strarray strarray;
 struct strarray
 {
     struct str *a;
-    size_t capacity, length;
+    size_t c, l;
 };
 
-struct str str_new();
+struct str  str_new();
 struct str *str_new_alloc();
-struct str str_from_c(char* p);
-struct str str_from_cn(char *p, size_t n);
-struct str str_from_copy_c(char *p);
-struct str str_substr(struct str str, size_t start, size_t end);
-int        str_cmp(struct str a, struct str b);
-size_t     str_find_sub(struct str haystack, struct str needle);
+struct str  str_from_c(char* p);
+struct str  str_from_cn(char *p, size_t n);
+struct str  str_from_copy_c(char *p);
+struct str  str_substr(struct str str, size_t start, size_t end);
+int         str_cmp(struct str a, struct str b);
+size_t      str_find_sub(struct str haystack, struct str needle);
 struct str *str_dup(struct str s);
-struct str str_cat(struct str* s, struct str n);
-void       str_resize(struct str* s, size_t newsz);
-struct str* str_aprintf(const char* fmt, ...);
+struct str  str_cat(struct str* s, struct str n);
+void        str_resize(struct str* s, size_t newsz);
+void        str_advance(struct str* s, size_t n);
+struct str *str_aprintf(const char* fmt, ...);
 
 #define str_cmpc(a, p) str_cmp(a, str_from_c(p))
 #define str_catc(a, p) str_cat(a, str_from_c(p))
@@ -107,8 +113,11 @@ struct str* str_aprintf(const char* fmt, ...);
 
 #define SHEEP_STR_INIT_CAP 512
 
-struct str* str_split_str(struct str haystack, struct str needle);
-struct str* str_split_c(struct str haystack, char* needle);
+struct strarray str_split(struct str s, struct str delim);
+#define str_split_c(s, delim) str_split(s, str_from_copy_c(delim))
+
+struct strarray strarray_new();
+void strarray_push(struct strarray *a, struct str s);
 
 #endif /* SHEEP_STR_H */
 
@@ -164,10 +173,9 @@ struct str str_from_cn(char *p, size_t n)
     size_t i;
     if (n < len) len = n;
     struct str s = str_new();
-	if (p == NULL)
-		return s;
-    str_resize(&s, len+1);
-    s.c = s.l = len;
+	if (p == NULL) return s;
+    str_resize(&s, s.c = len + 1);
+    s.l = len;
     for (i = 0; i < len; i++)
         s.b[i] = p[i];
     return s;
@@ -201,6 +209,8 @@ struct str str_substr(struct str str, size_t start, size_t end)
 
 int str_cmp(struct str a, struct str b)
 {
+    if (a.b == NULL && b.b == NULL)
+        return 0;
     size_t i;
     if (a.l < b.l)
         return -1;
@@ -227,12 +237,11 @@ size_t str_find_sub(struct str haystack, struct str needle)
     size_t m = 0;
     if (haystack.l < needle.l) return -1;
 
-    while (m < haystack.l - needle.l) {
+    while (m <= haystack.l - needle.l) {
         int ismatch = 1;
         size_t j;
         for (j = 0; j < needle.l; j++) {
             if (haystack.b[m+j] != needle.b[j]) {
-                m += j;
                 ismatch = 0;
                 break;
             }
@@ -240,8 +249,9 @@ size_t str_find_sub(struct str haystack, struct str needle)
         if (ismatch) {
             return m;
         }
+        m += j + 1;
     }
-    return haystack.l;
+    return -1;
 }
 
 void str_resize(struct str* s, size_t newsz)
@@ -291,6 +301,44 @@ str_dup(struct str s)
     ret->l = s.l;
     ret->b = s.b;
     return ret;
+}
+
+struct strarray str_split(struct str s, struct str delim)
+{
+    size_t length = 0, capacity = 4;
+    size_t i, lastdelim;
+    struct strarray arr;
+    arr = strarray_new();
+	for (;;)
+	{
+        i = str_find_sub(s, delim);
+        if (i == -1) break;
+        strarray_push(&arr, str_substr(s, 0, i-1));
+        str_advance(&s, i + delim.l);
+	}
+    strarray_push(&arr, str_substr(s, 0, s.l-1));
+	return arr;
+}
+
+void str_advance(struct str* s, size_t n) {
+    if (n > s->l)
+        return;
+    s->b += n;
+    s->l -= n;
+}
+
+struct strarray strarray_new() {
+    struct strarray a;
+    a.c = 4;
+    a.l = 0;
+    a.a = malloc(sizeof(struct str) * a.c);
+    return a;
+}
+
+void strarray_push(struct strarray *a, struct str s) {
+    if (a->l == a->c)
+        a->a = realloc(a->a, (a->c *= 2) * sizeof(struct str));
+    a->a[a->l++] = s;
 }
 
 #endif /* SHEEP_STR_IMPLEMENTATION */
