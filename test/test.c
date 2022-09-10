@@ -7,8 +7,8 @@
 #include "../include/dynarray.h"
 #define SHEEP_STR_IMPLEMENTATION
 #include "../include/str.h"
-#define SHEEP_SSORT_IMPLEMENTATION
-#include "../include/ssort.h"
+#include "../include/algo.h"
+
 
 #undef assert
 #define assert(chk) \
@@ -39,9 +39,11 @@ void rndarr(int size) {
     }
 }
 
-int cmpfnc(const void *a, const void *b) {
-	return *(int*)a - *(int*)b;
+int cmpm(int a, int b) {
+	return a-b;
 }
+
+SALGO_DECL(int,cmpm)
 
 int main() {
     it(new array) {
@@ -308,9 +310,10 @@ int main() {
         a = arrnew(int);
         rndarr(n);
         it(ssort) {
-            ssort(a, n, sizeof *a, cmpfnc);
-            for (j = 0; j < n - 1; j++)
+            ssort_int(a, n);
+            for (j = 0; j < n - 1; j++) {
                 assert(a[j] <= a[j+1]);
+            }
         } ti
     }
 
@@ -321,29 +324,29 @@ int main() {
             arrpush(a, i);
         it(sbsearch) {
             for (size_t i = 0; i < n; i++) {
-                int *br = sbsearch(&i, a, n, sizeof(int), cmpfnc);
+                int *br = sbsearch_int(i, a, n);
                 assert(*br == i);
                 assert(br - a == i);
             }
         } ti
         i = -1;
-        assert(sbsearch(&i, a, n, sizeof(int), cmpfnc) == NULL);
+        assert(sbsearch_int(i, a, n) == NULL);
         it(supperbound) {
             for (size_t i = 0; i < n - 1; i++) {
-                int *up = supperbound(&i, a, n, sizeof(int), cmpfnc);
+                int *up = supperbound_int(i, a, n);
                 assert(*up > i);
                 assert(up - a == i + 1);
             }
         } ti
         i = 2e9;
-        assert(supperbound(&i, a, n, sizeof(int), cmpfnc) == NULL);
+        assert(supperbound_int(i, a, n) == NULL);
         it(slowerbound) {
             for (size_t i = 0; i < n; i++) {
-                int *low = slowerbound(&i, a, n, sizeof(int), cmpfnc);
+                int *low = slowerbound_int(i, a, n);
                 assert(*low == i);
                 assert(low - a == i);
             }
         } ti
-        assert(slowerbound(&i, a, n, sizeof(int), cmpfnc) == NULL);
+        assert(slowerbound_int(i, a, n) == NULL);
     }
 }
