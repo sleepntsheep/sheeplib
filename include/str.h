@@ -121,6 +121,7 @@ void        str_cat(struct str* s, struct str n);
 void        str_resize(struct str* s, size_t newsz);
 void        str_advance(struct str* s, size_t n);
 struct str *str_aprintf(const char* fmt, ...);
+void str_ensure_empty(struct str *s, size_t n);
 
 #define str_cmpc(a, p) str_cmp(a, str_from_copy_c(p))
 #define str_catc(a, p) str_cat(a, str_from_copy_c(p))
@@ -157,6 +158,9 @@ char* sheep_strcpy(char *dest, const char *src) {
 		i++;
     return dest;
 }
+#endif
+
+#ifndef sheep_strncpy_safe
 #endif
 
 struct str str_new()
@@ -213,11 +217,12 @@ struct str str_substr(struct str str, size_t start, size_t end)
     /* We can't get rid of NUL-terminated string, sadly
      * many library depend on that and if we do we will have
      * to implement too much thing like printf replacement */
-    struct str substring = { 0 };
-    substring.l = end - start + 1;
-    substring.c = substring.l + 1;
-    substring.b = STR_MALLOC(substring.c);
-    sheep_strcpy(substring.b, str.b + start);
+    struct str substring = {
+        .l = end - start + 1,
+        .c = end - start + 2
+    };
+    str_resize(&substring, substring.c);
+    strncpy(substring.b, str.b + start, substring.l);
     substring.b[substring.l] = '\x0';
     return substring;
 }
@@ -239,9 +244,7 @@ int str_cmp(struct str a, struct str b)
 
 void str_cat(struct str *s, struct str n)
 {
-	if (s->l + n.l + 1 >= s->c) {
-		str_resize(s, s->l + n.l + 1);
-    }
+    str_ensure_empty(s, n.l);
 	sheep_strcpy(s->b + s->l, n.b);
 	s->l += n.l;
 }
@@ -269,13 +272,21 @@ size_t str_find_sub(struct str haystack, struct str needle)
     return -1;
 }
 
+void str_ensure_empty(struct str *s, size_t n)
+{
+    while (s->c - s->l < n) {
+        s->c *= 2;
+    }
+    str_resize(s, s->c);
+}
+
 void str_resize(struct str* s, size_t newsz)
 {
-    if (s->b == NULL)
+    if (s->b == NULL) {
         s->b = STR_MALLOC(newsz);
-    else if (newsz > s->c) {
+    } else if (newsz > s->c) {
 		s->b = STR_REALLOC(s->b, newsz);
-        s->b[newsz] = '\0';
+        s->b[newsz - 1] = '\0';
     }
     s->c = newsz;
 }

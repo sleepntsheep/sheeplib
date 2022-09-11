@@ -118,10 +118,22 @@ typedef struct sjsontokarr {
 } sjsontokarr;
 
 #define sjson_foreach(json, iter) \
-    for (sjson *iter = (json)->childvalue; iter != NULL; iter = iter->next) 
+    for (sjson *iter = (json)->childvalue; iter != NULL; iter = (iter)->next) 
 
 sjson *sjson_parse(sjsontokarr *toks);
 sjsontokarr *sjson_lex(char *s);
+sjson *sjson_array_get(sjson *json, size_t i);
+int sjson_array_set(sjson *json, char *key, sjson *value);
+int sjson_array_del(sjson *json, char *key, sjson *value);
+sjson *sjson_object_get(sjson *json, char *key);
+int sjson_object_del(sjson *json, char *key);
+int sjson_object_set(sjson *json, char *key, sjson *value);
+int sjson_deletechild(sjson *json, sjson *child);
+int sjson_addchild(sjson *json, sjson *child);
+
+int sjson_object_set(sjson *json, char *key, sjson *value);
+#define sjson_array_push sjson_addchild
+
 void sjson_debug_print(sjson *j, int indent);
 void sjson_register_logger(int (*logger)(const char*, ...));
 
@@ -179,15 +191,6 @@ sjson *sjson_new(int type) {
     sjson *sj = SJSON_CALLOC(1, sizeof(sjson));
     sj->type = type;
     return sj;
-}
-
-void sjson_addchild(sjson *parent, sjson *child) {
-    if (parent->tail == NULL) {
-        parent->tail = parent->childvalue = child;
-    } else {
-        parent->tail->next = child;
-        parent->tail = child;
-    }
 }
 
 sjsontok sjsontok_new(int type, char *start, char *end) {
@@ -325,6 +328,8 @@ sjson *sjson_parsearray(sjsontokarr *toks) {
 }
 
 sjson *sjson_parse(sjsontokarr *toks) {
+    if (toks->cur >= toks->length)
+        return sjson_new(SJSON_INVALID);
     sjsontok tok = toks->a[toks->cur];
     toks->cur++;
     switch (tok.type) {
@@ -361,6 +366,64 @@ sjson *sjson_parse(sjsontokarr *toks) {
     }
 }
 
+int sjson_deletechild(sjson *json, sjson *child) {
+    if (json->tail == child) {
+        if (json->childvalue == child)
+            json->tail = json->childvalue = NULL;
+        else
+            json->tail = child->prev;
+    } else if (json->childvalue == child) {
+        json->childvalue == child->next;
+    }
+    if (child->prev)
+        child->prev->next = child->next;
+    if (child->next)
+        child->next->prev = child->prev;
+}
+
+sjson *sjson_object_get(sjson *json, char *key) {
+    sjson_foreach(json, iter)
+        if (!strcmp(iter->key, key))
+            return iter;
+    return NULL;
+}
+
+int sjson_object_del(sjson *json, char *key) {
+    sjson_foreach(json, iter) {
+        if (!strcmp(iter->key, key)) {
+            sjson_deletechild(json, iter);
+            logger("Deleted key : %s\n", key);
+        }
+    }
+    return 0;
+}
+
+int sjson_object_set(sjson *json, char *key, sjson *value) {
+    sjson_object_del(json, key);
+    value->key = key;
+    sjson_addchild(json, value);
+    return 0;
+}
+
+int sjson_addchild(sjson *json, sjson *child) {
+    if (json->tail == NULL || json->childvalue == NULL) {
+        json->tail = json->childvalue = child;
+    } else {
+        json->tail->next = child;
+        child->prev = json->tail;
+        json->tail = child;
+    }
+    return 0;
+}
+
+sjson *sjson_array_get(sjson *json, size_t i) {
+    size_t x = 0;
+    sjson_foreach(json, iter)
+        if (x++ == i)
+            return iter;
+    return NULL;
+}
+
 void sjson_print_tokarr(sjsontokarr *arr) {
     for (int i =0 ; i< arr->length; i++)
      {
@@ -379,6 +442,50 @@ void sjson_debug_print(sjson *j, int indent) {
             j->type, j->key, j->numbervalue, j->stringvalue);
     if (j->childvalue) sjson_debug_print(j->childvalue, indent+1);
     if (j->next) sjson_debug_print(j->next, indent);
+}
+
+int sjson_deserialize(FILE *fp, sjson *json) {
+    switch (json->type) {
+        case SJSON_INVALID:
+            break;
+        case SJSON_NUMBER:
+            fprintf(fp, "%lf", json->numbervalue);
+            break;
+        case SJSON_STRING:
+            fprintf(fp, "\"%s\"", json->stringvalue);
+            break;
+        case SJSON_NULL:
+            fprintf(fp, "null");
+            break;
+        case SJSON_TRUE:
+            fprintf(fp, "true");
+            break;
+        case SJSON_FALSE:
+            fprintf(fp, "false");
+            break;
+        case SJSON_OBJECT:
+            fprintf(fp, "{");
+            sjson_foreach(json, it) {
+                fprintf(fp, "\"%s\": ", it->key);
+                sjson_deserialize(fp, it);
+                if (it->next != NULL)
+                    fprintf(fp, ",");
+            }
+            fprintf(fp, "}");
+            break;
+        case SJSON_ARRAY:
+            fprintf(fp, "[");
+            sjson_foreach(json, it) {
+                sjson_deserialize(fp, it);
+                if (it->next != NULL)
+                    fprintf(fp, ",");
+            }
+            fprintf(fp, "]");
+            break;
+        default:
+            SJSON_LOG(SJSON_INVALID_TYPE);
+            break;
+    }
 }
 
 

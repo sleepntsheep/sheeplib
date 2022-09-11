@@ -32,6 +32,7 @@ int main() {
         sjson_print_tokarr(toks);
         sjson *json;
         json = sjson_parse(toks);
-        sjson_debug_print(json, 0);
+        //sjson_debug_print(json, 0);
+        sjson_deserialize(stdout, json);
     }
 }
