@@ -344,7 +344,7 @@ sjson *sjson_parse(sjsontokarr *toks) {
                 char *end = tok.end;
                 char temp = end[1];
                 end[1] = 0;
-                j->numbervalue = strtof(tok.start, NULL);
+                j->numbervalue = strtod(tok.start, NULL);
                 end[1] = temp;
                 return j;
             }
@@ -375,7 +375,7 @@ void sjson_debug_print(sjson *j, int indent) {
     }
     for (int i = 0; i < indent; i++)
         printf(" ");
-    printf("JSON :   type = %d   name = %s   num = %5.2lf   str = %s\n",
+    printf("JSON :   type = %d   name = %s   num = %5.6lf   str = %s\n",
             j->type, j->key, j->numbervalue, j->stringvalue);
     if (j->childvalue) sjson_debug_print(j->childvalue, indent+1);
     if (j->next) sjson_debug_print(j->next, indent);
