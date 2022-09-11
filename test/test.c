@@ -8,6 +8,8 @@
 #define SHEEP_STR_IMPLEMENTATION
 #include "../include/str.h"
 #include "../include/algo.h"
+#define SHEEP_SJSON_IMPLEMENTATION
+#include "../include/sjson.h"
 
 
 #undef assert
@@ -27,16 +29,16 @@ clock_t start;
 #define ti \
     printf("time taken %ld (cpu time)\n", (clock() - start));
 
-int *a;
-
-void rndarr(int size) {
+int *rndarr(int size) {
     int i;
+    int *a = arrnew(int);
     for (i = 0; i < arrlen(a); i++)
          arrpop(a);
     for (i = 0; i < size; i++) {
         int b = rand() % 65531;
         arrpush(a, b);
     }
+    return a;
 }
 
 int cmpm(int a, int b) {
@@ -307,8 +309,7 @@ int main() {
     {
         size_t j, n = 1000000;
         srand(time(NULL));
-        a = arrnew(int);
-        rndarr(n);
+        int *a = rndarr(n);
         it(ssort) {
             ssort_int(a, n);
             for (j = 0; j < n - 1; j++) {
@@ -319,7 +320,7 @@ int main() {
 
     {
         int n = 1000000, i;
-        a = arrnew(int);
+        int *a = arrnew(int);
         for (i = 0; i < n; i++)
             arrpush(a, i);
         it(sbsearch) {
@@ -349,4 +350,15 @@ int main() {
         } ti
         assert(slowerbound_int(i, a, n) == NULL);
     }
+
+    it(json) {
+        char *j;
+        j = "{ \"key\": \"value\", \"num\": -2839.489 } ";
+        sjsontokarr *toks = sjson_lex(strdup(j));
+        sjson *json = sjson_parse(toks);
+        assert(!strcmp(json->childvalue->key, "key"));;
+        assert(!strcmp(json->childvalue->stringvalue, "value"));;
+        assert(!strcmp(json->childvalue->next->key, "num"));
+        assert(json->childvalue->next->numbervalue == -2839.489);
+    } ti
 }

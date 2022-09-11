@@ -5,7 +5,6 @@
 #include <stdio.h>
 
 const char *tests[]=  {
-    "{ \"key\": \"value\", \"num\": -2839.489 } ",
     "{\"obj\": {}}", 
     "[1, 2]",
     "[]",
