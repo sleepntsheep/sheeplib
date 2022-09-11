@@ -66,6 +66,8 @@
  *       - str_substr
  *       - str_from_cn
  *
+ * To use custom allocator, define STR_MALLOC, STR_CALLOC, STR_REALLOC
+ *
  * - sleepntsheep 2022
  *
  * TODO :
@@ -75,6 +77,19 @@
 #pragma once
 #ifndef SHEEP_STR_H
 #define SHEEP_STR_H
+
+#ifndef STR_MALLOC
+#include <stdlib.h>
+#define STR_MALLOC malloc
+#endif
+#ifndef STR_REALLOC
+#include <stdlib.h>
+#define STR_REALLOC realloc
+#endif
+#ifndef STR_CALLOC
+#include <stdlib.h>
+#define STR_CALLOC calloc
+#endif
 
 #include <stddef.h>
 #include <stdio.h>
@@ -122,7 +137,6 @@ void strarray_push(struct strarray *a, struct str s);
 #endif /* SHEEP_STR_H */
 
 #ifdef SHEEP_STR_IMPLEMENTATION
-#include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 #include <stdio.h>
@@ -147,7 +161,7 @@ char* sheep_strcpy(char *dest, const char *src) {
 
 struct str str_new()
 {
-	char* b = calloc(SHEEP_STR_INIT_CAP, 1);
+	char* b = STR_CALLOC(SHEEP_STR_INIT_CAP, 1);
 	return (struct str){ b, SHEEP_STR_INIT_CAP, 0 } ;
 }
 
@@ -202,7 +216,7 @@ struct str str_substr(struct str str, size_t start, size_t end)
     struct str substring = { 0 };
     substring.l = end - start + 1;
     substring.c = substring.l + 1;
-    substring.b = malloc(substring.c);
+    substring.b = STR_MALLOC(substring.c);
     sheep_strcpy(substring.b, str.b + start);
     substring.b[substring.l] = '\x0';
     return substring;
@@ -258,9 +272,9 @@ size_t str_find_sub(struct str haystack, struct str needle)
 void str_resize(struct str* s, size_t newsz)
 {
     if (s->b == NULL)
-        s->b = malloc(newsz);
+        s->b = STR_MALLOC(newsz);
     else if (newsz > s->c) {
-		s->b = realloc(s->b, newsz);
+		s->b = STR_REALLOC(s->b, newsz);
         s->b[newsz] = '\0';
     }
     s->c = newsz;
@@ -297,7 +311,7 @@ str_aprintf(const char* fmt, ...)
 struct str*
 str_dup(struct str s)
 {
-    struct str* ret = calloc(1, sizeof(*ret));
+    struct str* ret = STR_CALLOC(1, sizeof(*ret));
     ret->c = s.c;
     ret->l = s.l;
     ret->b = s.b;
@@ -332,13 +346,13 @@ struct strarray strarray_new() {
     struct strarray a;
     a.c = 4;
     a.l = 0;
-    a.a = malloc(sizeof(struct str) * a.c);
+    a.a = STR_MALLOC(sizeof(struct str) * a.c);
     return a;
 }
 
 void strarray_push(struct strarray *a, struct str s) {
     if (a->l == a->c)
-        a->a = realloc(a->a, (a->c *= 2) * sizeof(struct str));
+        a->a = STR_REALLOC(a->a, (a->c *= 2) * sizeof(struct str));
     a->a[a->l++] = s;
 }
 
