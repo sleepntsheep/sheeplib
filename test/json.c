@@ -4,7 +4,6 @@
 #include <string.h>
 #include <stdio.h>
 
-
 const char *tests[]=  {
     "{ \"key\": \"value\", \"num\": -2839.489 } ",
     "{\"obj\": {}}", 
@@ -15,6 +14,14 @@ const char *tests[]=  {
     "[[{}, {}]]",
     "{\"a\": [1,2]}", 
     "[{\"b\": [1,2]}]", 
+    "{  \
+         \"settings\": {\
+            \"dowrap\": true, \
+            \"liveupdate\": false, \
+            \"pointer\": null\
+         },\
+         \"delay\": 100.59\
+     }"
 };
 
 int main() {
@@ -28,7 +35,4 @@ int main() {
         json = sjson_parse(toks);
         sjson_debug_print(json, 0);
     }
-
-    //json = sjson_parse(strdup("{ \"nums\": 12, \"n2\": 390.2, \"arr\": [ 2, 3, 4, \"POG\" ] }"));
-    //sjson_debug_print(json.sjson,0);
 }

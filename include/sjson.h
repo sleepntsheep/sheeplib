@@ -271,12 +271,15 @@ sjsontokarr *sjson_lex(char *s) {
             }
             case 'n':
                 sjsontokarr_push(arr, sjsontok_new(SJSON_TKNULL, s, s+3));
+                s += 3;
                 break;
             case 't':
                 sjsontokarr_push(arr, sjsontok_new(SJSON_TKTRUE, s, s+3));
+                s += 3;
                 break;
             case 'f':
                 sjsontokarr_push(arr, sjsontok_new(SJSON_TKFALSE, s, s+4));
+                s += 4;
                 break;
             case ' ':
             case '\t':
