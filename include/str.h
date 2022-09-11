@@ -121,7 +121,7 @@ void        str_cat(struct str* s, struct str n);
 void        str_resize(struct str* s, size_t newsz);
 void        str_advance(struct str* s, size_t n);
 struct str *str_aprintf(const char* fmt, ...);
-void str_ensure_empty(struct str *s, size_t n);
+void        str_ensure_empty(struct str *s, size_t n);
 
 #define str_cmpc(a, p) str_cmp(a, str_from_copy_c(p))
 #define str_catc(a, p) str_cat(a, str_from_copy_c(p))
@@ -142,41 +142,17 @@ void strarray_push(struct strarray *a, struct str s);
 #include <string.h>
 #include <stdio.h>
 
-#ifndef sheep_strlen
-size_t sheep_strlen(char *s) {
-    size_t i = 0;
-    while (s[i])
-        i++;
-    return i;
-}
-#endif
-
-#ifndef sheep_strcpy
-char* sheep_strcpy(char *dest, const char *src) {
-	size_t i = 0;
-	while ((dest[i] = src[i]))
-		i++;
-    return dest;
-}
-#endif
-
-#ifndef sheep_strncpy_safe
-#endif
-
-struct str str_new()
-{
+struct str str_new() {
 	char* b = STR_CALLOC(SHEEP_STR_INIT_CAP, 1);
 	return (struct str){ b, SHEEP_STR_INIT_CAP, 0 } ;
 }
 
-struct str *str_new_alloc()
-{
+struct str *str_new_alloc() {
     return str_dup(str_new());
 }
 
-struct str str_from_c(char* p)
-{
-    size_t len = sheep_strlen(p);
+struct str str_from_c(char* p) {
+    size_t len = strlen(p);
 	struct str s = { 0 }; 
 	if (p == NULL)
 		return s;
@@ -186,9 +162,8 @@ struct str str_from_c(char* p)
 	return s;
 }
 
-struct str str_from_cn(char *p, size_t n)
-{
-    size_t len = sheep_strlen(p);
+struct str str_from_cn(char *p, size_t n) {
+    size_t len = strlen(p);
     size_t i;
     if (n < len) len = n;
     struct str s = str_new();
@@ -200,20 +175,18 @@ struct str str_from_cn(char *p, size_t n)
     return s;
 }
 
-struct str str_from_copy_c(char *p)
-{
+struct str str_from_copy_c(char *p) {
     struct str s = { 0 };
 	if (p == NULL)
 		return s;
-    s.l = sheep_strlen(p);
-    s.c = s.l + 1;
+    s.l = strlen(p);
+    str_ensure_empty(&s, s.l);
     str_resize(&s, s.c);
-    sheep_strcpy(s.b, p);
+    memcpy(s.b, p, s.l);
     return s;
 }
 
-struct str str_substr(struct str str, size_t start, size_t end)
-{
+struct str str_substr(struct str str, size_t start, size_t end) {
     /* We can't get rid of NUL-terminated string, sadly
      * many library depend on that and if we do we will have
      * to implement too much thing like printf replacement */
@@ -227,8 +200,7 @@ struct str str_substr(struct str str, size_t start, size_t end)
     return substring;
 }
 
-int str_cmp(struct str a, struct str b)
-{
+int str_cmp(struct str a, struct str b) {
     if (a.b == NULL && b.b == NULL)
         return 0;
     size_t i;
@@ -242,15 +214,13 @@ int str_cmp(struct str a, struct str b)
     return 0;
 }
 
-void str_cat(struct str *s, struct str n)
-{
+void str_cat(struct str *s, struct str n) {
     str_ensure_empty(s, n.l);
-	sheep_strcpy(s->b + s->l, n.b);
+    memcpy(s->b + s->l, n.b, n.l);
 	s->l += n.l;
 }
 
-size_t str_find_sub(struct str haystack, struct str needle)
-{
+size_t str_find_sub(struct str haystack, struct str needle) {
     /* kmp algo */
     size_t m = 0;
     if (haystack.l < needle.l) return -1;
@@ -272,16 +242,13 @@ size_t str_find_sub(struct str haystack, struct str needle)
     return -1;
 }
 
-void str_ensure_empty(struct str *s, size_t n)
-{
-    while (s->c - s->l < n) {
+void str_ensure_empty(struct str *s, size_t n) {
+    while (s->c - s->l < n)
         s->c *= 2;
-    }
     str_resize(s, s->c);
 }
 
-void str_resize(struct str* s, size_t newsz)
-{
+void str_resize(struct str* s, size_t newsz) {
     if (s->b == NULL) {
         s->b = STR_MALLOC(newsz);
     } else if (newsz > s->c) {
@@ -291,9 +258,7 @@ void str_resize(struct str* s, size_t newsz)
     s->c = newsz;
 }
 
-size_t
-__sprintf_sz(const char* fmt, ...)
-{
+size_t __sprintf_sz(const char* fmt, ...) {
 	size_t len;
 	va_list args;
 	va_start(args, fmt);
@@ -302,9 +267,7 @@ __sprintf_sz(const char* fmt, ...)
 	return len;
 }
 
-struct str*
-str_aprintf(const char* fmt, ...)
-{
+struct str* str_aprintf(const char* fmt, ...) {
     size_t len;
 	va_list args;
 	va_start(args, fmt);
@@ -315,13 +278,11 @@ str_aprintf(const char* fmt, ...)
 	va_start(args, fmt);
 	vsnprintf(s->b, len, fmt, args);
 	va_end(args);
-    s->l = sheep_strlen(s->b);
+    s->l = strlen(s->b);
 	return s;
 }
 
-struct str*
-str_dup(struct str s)
-{
+struct str* str_dup(struct str s) {
     struct str* ret = STR_CALLOC(1, sizeof(*ret));
     ret->c = s.c;
     ret->l = s.l;
@@ -329,8 +290,7 @@ str_dup(struct str s)
     return ret;
 }
 
-struct strarray str_split(struct str s, struct str delim)
-{
+struct strarray str_split(struct str s, struct str delim) {
     size_t length = 0, capacity = 4;
     size_t i, lastdelim;
     struct strarray arr;

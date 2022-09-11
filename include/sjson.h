@@ -30,7 +30,6 @@
  * stringvalue store string if type is string
  * numbervalue store double number if type is number
  *
- * To see/check content of json do sjson_debug_print(json)
  */
 
 #ifndef SHEEP_SJSON_H

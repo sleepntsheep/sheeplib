@@ -14,9 +14,7 @@ None of these library depend on each other.
     about the dynarray
 
 - ssort.h 
-    : (sheep_qsort) drop in qsort replacement
-      and some more algorithms that perform on array
-      like binary search
+    : mergesort, binarysearch, upperbound, lowerbound
 
 - xmalloc.h 
     : just normal x-wrapper function,
@@ -43,8 +41,8 @@ To install shared library, use cmake
 you will need to define SHEEP_HEADER_IMPLEMENTATION before using it
 (this applys even if you are using shared library)
 
-    #define SHEEP_SSORT_IMPLEMENTATION
-    #include <sheeplib/ssort.h>
+    #define SHEEP_ALGO_IMPLEMENTATION
+    #include <sheeplib/algo.h>
 
 for further information, read the document in header file itself
 
@@ -58,7 +56,7 @@ you only need the .h file if you want to use this as single header library
 these are single header library, just copy it to your project.
 and read the comments in the library for further instructions.
 
-you don't need any specific unit test library, just C99 compiler
-and run test.c
+# test
 
+compile and run test.c with C11 or later compiler
 
