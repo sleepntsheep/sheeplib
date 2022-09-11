@@ -294,7 +294,7 @@ describe(str) {
 }
 
 describe(algo) {
-    size_t j, n = 10000000;
+    size_t j, n = 100000;
     srand(time(NULL));
     int *a = rndarr(n);
     it("ssort") {
@@ -343,6 +343,81 @@ describe(json) {
         assert(!strcmp(json->childvalue->next->key, "num"));
         assert(json->childvalue->next->numbervalue == -2839.489);
     }
+
+    it("parse null") {
+        sjson *j = sjson_serialize(strdup("null"));
+        asserteq_int(j->type, SJSON_NULL);
+    }
+
+    it("parse false") {
+        sjson *j = sjson_serialize(strdup("false"));
+        asserteq_int(j->type, SJSON_FALSE);
+    }
+
+    it("parse true") {
+        sjson *j = sjson_serialize(strdup("true"));
+        asserteq_int(j->type, SJSON_TRUE);
+    }
+
+    it("parse positive int") {
+        const char *nums[] = { "2", "3", "4", "5", "6", "10000" };
+        const int ans[] = { 2, 3, 4, 5, 6, 10000 };
+        for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
+            sjson *j = sjson_serialize(strdup(nums[i]));
+            asserteq_int(j->type, SJSON_NUMBER);
+            asserteq_dbl(j->numbervalue, ans[i]);
+        }
+    }
+
+    it("parse negative int") {
+        const char *nums[] = { "-2", "-3", "-4", "-5", "-6", "-10000" };
+        const int ans[] = { -2, -3, -4, -5, -6, -10000 };
+        for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
+            sjson *j = sjson_serialize(strdup(nums[i]));
+            asserteq_int(j->type, SJSON_NUMBER);
+            asserteq_dbl(j->numbervalue, ans[i]);
+        }
+    }
+
+    it("parse zero") {
+        const char *nums[] = { "0", "00", "000", "0000", "00000" };
+        for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
+            sjson *j = sjson_serialize(strdup(nums[i]));
+            asserteq_int(j->type, SJSON_NUMBER);
+            asserteq_dbl(j->numbervalue, 0);
+        }
+    }
+
+    it("parse positive floating") {
+        const char *nums[] = { "2.213", "3.9203", "4.23", "5.738", "6.01", "10000.389" };
+        const double ans[] = { 2.213, 3.9203, 4.23, 5.738, 6.01, 10000.389 };
+        for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
+            sjson *j = sjson_serialize(strdup(nums[i]));
+            asserteq_int(j->type, SJSON_NUMBER);
+            asserteq_dbl(j->numbervalue, ans[i]);
+        }
+    }
+
+    it("parse negative floating") {
+        const char *nums[] = { "-2.213", "-3.9203", "-4.23", "-5.738", "-6.01", "-10000.389" };
+        const double ans[] = { -2.213, -3.9203, -4.23, -5.738, -6.01, -10000.389 };
+        for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
+            sjson *j = sjson_serialize(strdup(nums[i]));
+            asserteq_int(j->type, SJSON_NUMBER);
+            asserteq_dbl(j->numbervalue, ans[i]);
+        }
+    }
+
+    it("parse string") {
+        char *strs[] = { "\"POOOG\"", "\"SHIEN\"", "\"WATER\"", "\"Kronii\"" };
+        char *ans[] = { "POOOG", "SHIEN", "WATER", "Kronii" };
+        for (int i = 0; i < sizeof strs / sizeof *strs; i++) {
+            sjson *j = sjson_serialize(strdup(strs[i]));
+            asserteq_int(j->type, SJSON_STRING);
+            asserteq_str(j->stringvalue, ans[i]);
+        }
+    }
+
 }
 
 snow_main();

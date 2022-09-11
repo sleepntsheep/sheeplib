@@ -29,7 +29,6 @@ int main() {
         puts(tests[i]);
         sjsontokarr *toks;
         toks = sjson_lex(strdup(tests[i]));
-        sjson_print_tokarr(toks);
         sjson *json;
         json = sjson_parse(toks);
         //sjson_debug_print(json, 0);
