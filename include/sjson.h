@@ -36,6 +36,7 @@
 #ifndef SHEEP_SJSON_H
 #define SHEEP_SJSON_H
 #include <stddef.h>
+#include <stdio.h>
 
 static int sjson_isdigit(char c) {
     return ('0' <= c && c <= '9') || c == '-' || c == '+' || c == '.';
@@ -65,7 +66,6 @@ static int sjson_iswhitespace(char c) {
     SJSON_X(SJSON_OBJECT_NO_MATCHING_KEY), \
     SJSON_X(SJSON_OUT_OF_BOUND), \
     SJSON_X(SJSON_UNKNOWN_CHARACTER), \
-    SJSON_X(SJSON_TRAILING_COMMA), \
     SJSON_X(SJSON_MISSING_COLON), 
 
 #define SJSON_TOKENS_LIST \
@@ -120,21 +120,27 @@ typedef struct sjsontokarr {
 #define sjson_foreach(json, iter) \
     for (sjson *iter = (json)->childvalue; iter != NULL; iter = (iter)->next) 
 
+sjson *sjson_new(int type);
+
+sjson *sjson_serialize(char *s);
+void sjson_deserialize(FILE *fp, sjson *json);
+
 sjson *sjson_parse(sjsontokarr *toks);
 sjsontokarr *sjson_lex(char *s);
-sjson *sjson_array_get(sjson *json, size_t i);
-int sjson_array_set(sjson *json, char *key, sjson *value);
-int sjson_array_del(sjson *json, char *key, sjson *value);
-sjson *sjson_object_get(sjson *json, char *key);
-int sjson_object_del(sjson *json, char *key);
-int sjson_object_set(sjson *json, char *key, sjson *value);
-int sjson_deletechild(sjson *json, sjson *child);
-int sjson_addchild(sjson *json, sjson *child);
+void sjsontokarr_free(sjsontokarr *toks);
 
-int sjson_object_set(sjson *json, char *key, sjson *value);
+sjson *sjson_array_get(sjson *json, size_t i);
+void sjson_array_set(sjson *json, char *key, sjson *value);
+void sjson_array_del(sjson *json, char *key, sjson *value);
+sjson *sjson_object_get(sjson *json, char *key);
+void sjson_object_del(sjson *json, char *key);
+void sjson_object_set(sjson *json, char *key, sjson *value);
+
+void sjson_addchild(sjson *json, sjson *child);
+void sjson_deletechild(sjson *json, sjson *child);
+
 #define sjson_array_push sjson_addchild
 
-void sjson_debug_print(sjson *j, int indent);
 void sjson_register_logger(int (*logger)(const char*, ...));
 
 #ifndef SJSON_MALLOC
@@ -146,6 +152,9 @@ void sjson_register_logger(int (*logger)(const char*, ...));
 #ifndef SJSON_REALLOC
 #define SJSON_REALLOC realloc 
 #endif /* SJSON_REALLOC */
+#ifndef SJSON_FREE 
+#define SJSON_FREE free
+#endif /* SJSON_FREE */
 
 
 #endif /* SHEEP_SJSON_H */
@@ -200,7 +209,6 @@ sjsontok sjsontok_new(int type, char *start, char *end) {
         .end = end,
     };
 }
-
 
 sjsontokarr *sjsontokarr_new() {
     sjsontokarr *arr = malloc(sizeof(sjsontokarr));
@@ -289,7 +297,7 @@ sjsontokarr *sjson_lex(char *s) {
             case '\n':
                 break;
             default:
-                logger("unknown char : %c", *s);
+                logger("unknown char : %c\n", *s);
                 break;
         }
         s++;
@@ -307,9 +315,13 @@ sjson *sjson_parseobject(sjsontokarr *toks) {
         toks->cur++;
         sjson *child = sjson_parse(toks);
         child->key = key;
+        sjson_addchild(obj, child);
         if (toks->a[toks->cur].type == SJSON_TKCOMMA)
             toks->cur++;
-        sjson_addchild(obj, child);
+        else if (toks->a[toks->cur].type == SJSON_TKRBRACE)
+            break;
+        else
+            SJSON_LOG(SJSON_NO_TERMINATING_BRACE);
     }
     toks->cur++;
     return obj;
@@ -322,6 +334,10 @@ sjson *sjson_parsearray(sjsontokarr *toks) {
         sjson_addchild(obj, child);
         if (toks->a[toks->cur].type == SJSON_TKCOMMA)
             toks->cur++;
+        else if (toks->a[toks->cur].type == SJSON_TKRSQUAREBRACKET)
+            break;
+        else
+            SJSON_LOG(SJSON_NO_TERMINATING_SQUAREBRACKET);
     }
     toks->cur++;
     return obj;
@@ -366,14 +382,14 @@ sjson *sjson_parse(sjsontokarr *toks) {
     }
 }
 
-int sjson_deletechild(sjson *json, sjson *child) {
+void sjson_deletechild(sjson *json, sjson *child) {
     if (json->tail == child) {
         if (json->childvalue == child)
             json->tail = json->childvalue = NULL;
         else
             json->tail = child->prev;
     } else if (json->childvalue == child) {
-        json->childvalue == child->next;
+        json->childvalue = child->next;
     }
     if (child->prev)
         child->prev->next = child->next;
@@ -388,24 +404,19 @@ sjson *sjson_object_get(sjson *json, char *key) {
     return NULL;
 }
 
-int sjson_object_del(sjson *json, char *key) {
-    sjson_foreach(json, iter) {
-        if (!strcmp(iter->key, key)) {
+void sjson_object_del(sjson *json, char *key) {
+    sjson_foreach(json, iter)
+        if (!strcmp(iter->key, key))
             sjson_deletechild(json, iter);
-            logger("Deleted key : %s\n", key);
-        }
-    }
-    return 0;
 }
 
-int sjson_object_set(sjson *json, char *key, sjson *value) {
+void sjson_object_set(sjson *json, char *key, sjson *value) {
     sjson_object_del(json, key);
     value->key = key;
     sjson_addchild(json, value);
-    return 0;
 }
 
-int sjson_addchild(sjson *json, sjson *child) {
+void sjson_addchild(sjson *json, sjson *child) {
     if (json->tail == NULL || json->childvalue == NULL) {
         json->tail = json->childvalue = child;
     } else {
@@ -413,7 +424,6 @@ int sjson_addchild(sjson *json, sjson *child) {
         child->prev = json->tail;
         json->tail = child;
     }
-    return 0;
 }
 
 sjson *sjson_array_get(sjson *json, size_t i) {
@@ -424,27 +434,14 @@ sjson *sjson_array_get(sjson *json, size_t i) {
     return NULL;
 }
 
-void sjson_print_tokarr(sjsontokarr *arr) {
-    for (int i =0 ; i< arr->length; i++)
-     {
-         printf("%s %.*s\n", sjson_tokennames[arr->a[i].type], arr->a[i].end - arr->a[i].start + 1,  arr->a[i].start);
-     }
+sjson *sjson_serialize(char *s) {
+    sjsontokarr *toks = sjson_lex(s);
+    sjson *json = sjson_parse(toks);
+    sjsontokarr_free(toks);
+    return json;
 }
 
-void sjson_debug_print(sjson *j, int indent) {
-    if (j == NULL) {
-        SJSON_LOG(SJSON_NULL_REFERENCE);
-        return;
-    }
-    for (int i = 0; i < indent; i++)
-        printf(" ");
-    printf("JSON :   type = %d   name = %s   num = %5.6lf   str = %s\n",
-            j->type, j->key, j->numbervalue, j->stringvalue);
-    if (j->childvalue) sjson_debug_print(j->childvalue, indent+1);
-    if (j->next) sjson_debug_print(j->next, indent);
-}
-
-int sjson_deserialize(FILE *fp, sjson *json) {
+void sjson_deserialize(FILE *fp, sjson *json) {
     switch (json->type) {
         case SJSON_INVALID:
             break;
@@ -470,6 +467,7 @@ int sjson_deserialize(FILE *fp, sjson *json) {
                 sjson_deserialize(fp, it);
                 if (it->next != NULL)
                     fprintf(fp, ",");
+                fprintf(fp, "\n");
             }
             fprintf(fp, "}");
             break;
@@ -479,6 +477,7 @@ int sjson_deserialize(FILE *fp, sjson *json) {
                 sjson_deserialize(fp, it);
                 if (it->next != NULL)
                     fprintf(fp, ",");
+                fprintf(fp, "\n");
             }
             fprintf(fp, "]");
             break;
@@ -488,5 +487,28 @@ int sjson_deserialize(FILE *fp, sjson *json) {
     }
 }
 
+void sjsontokarr_free(sjsontokarr *toks) {
+    SJSON_FREE(toks->a);
+}
+
+/*
+void sjson_print_tokarr(sjsontokarr *arr) {
+    for (int i =0 ; i< arr->length; i++)
+         printf("%s %.*s\n", sjson_tokennames[arr->a[i].type], arr->a[i].end - arr->a[i].start + 1,  arr->a[i].start);
+}
+
+void sjson_debug_print(sjson *j, int indent) {
+    if (j == NULL) {
+        SJSON_LOG(SJSON_NULL_REFERENCE);
+        return;
+    }
+    for (int i = 0; i < indent; i++)
+        printf(" ");
+    printf("JSON :   type = %d   name = %s   num = %5.6lf   str = %s\n",
+            j->type, j->key, j->numbervalue, j->stringvalue);
+    if (j->childvalue) sjson_debug_print(j->childvalue, indent+1);
+    if (j->next) sjson_debug_print(j->next, indent);
+}
+*/
 
 #endif /* SHEEP_SJSON_IMPLEMENTATION */

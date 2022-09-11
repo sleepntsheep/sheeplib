@@ -13,6 +13,10 @@
 #define SNOW_ENABLED
 #include "snow.h"
 
+/* 
+ * TODO 
+ *     add more complicated nested sjson.h test cases 
+ */
 
 int *rndarr(int size) {
     int i;
