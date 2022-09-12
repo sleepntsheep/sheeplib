@@ -184,8 +184,9 @@ struct str str_from_copy_c(char *p) {
 	if (p == NULL)
 		return s;
     s.l = strlen(p);
-    str_ensure_empty(&s, s.l);
+    str_ensure_empty(&s, s.l+1);
     memcpy(s.b, p, s.l);
+    s.b[s.l] = 0;
     return s;
 }
 
@@ -247,7 +248,7 @@ size_t str_find_sub(struct str haystack, struct str needle) {
 
 void str_ensure_empty(struct str *s, size_t n) {
     if (s->c == 0)
-        *s = str_new();
+        s->c = SHEEP_STR_INIT_CAP;
     while (s->c - s->l < n)
         s->c *= 2;
     str_resize(s, s->c);
@@ -263,26 +264,17 @@ void str_resize(struct str* s, size_t newsz) {
     s->c = newsz;
 }
 
-size_t __sprintf_sz(const char* fmt, ...) {
-	size_t len;
-	va_list args;
-	va_start(args, fmt);
-	len = vsnprintf(NULL, 0, fmt, args);
-	va_end(args);
-	return len;
-}
-
 struct str str_aprintf(const char* fmt, ...) {
     size_t len;
 	va_list args;
 	va_start(args, fmt);
-	len = __sprintf_sz(fmt, args);
+	len = vsnprintf(NULL, 0, fmt, args);
 	va_end(args);
-	struct str s = str_new();
+	struct str s = {0};
     s.l = len;
-    str_ensure_empty(&s, s.l);
+    str_ensure_empty(&s, s.l+1);
 	va_start(args, fmt);
-	vsnprintf(s.b, len, fmt, args);
+	vsnprintf(s.b, s.l+1, fmt, args);
 	va_end(args);
 	return s;
 }

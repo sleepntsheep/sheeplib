@@ -42,15 +42,6 @@ describe(dynarray) {
         assert(a);
     }
 
-    it("array info") {
-        int *a = arrnew(int);
-        dynarray_info_t *info = dynarray_info(a);
-        assert(info);
-        assert(DYNARRAY_MIN_CAPACITY == info->capacity);
-        assert(0 == info->length);
-        assert(sizeof(int) == info->membsize);
-    }
-
     it("array len") {
         int *a = arrnew(int);
         asserteq_int(arrlen(a), 0);
@@ -175,7 +166,7 @@ describe(str) {
         assert(s.b[0] == '\0');
         asserteq_int(s.l, 0);
         assert(s.c == SHEEP_STR_INIT_CAP);
-        assert(!strcmp(s.b, ""));
+        asserteq_str(s.b, "");
         free(s.b);
     }
 
@@ -183,28 +174,27 @@ describe(str) {
         str s = str_new();
         str s2 = str_from_c("POG");
         str_catc(&s, "Hello");
-        assert(!strcmp(s.b, "Hello"));
+        asserteq_str(s.b, "Hello");
         str_catc(&s, " World");
-        assert(!strcmp(s.b, "Hello World"));
+        asserteq_str(s.b, "Hello World");
         str_cat(&s, s2);
-        assert(!strcmp(s.b, "Hello WorldPOG"));
+        asserteq_str(s.b, "Hello WorldPOG");
         free(s.b);
-        free(s2.b);
         /* undefined behaviour
         str_cat(&s, s);
-        assert(!strcmp(s.b, "Hello WorldHello World"));
+        asserteq_str(s.b, "Hello WorldHello World");
         */
     }
 
     it("str_from_c") {
         str s = str_from_c("Disaster");
-        assert(!strcmp(s.b, "Disaster"));
+        asserteq_str(s.b, "Disaster");
     }
 
     it("str_from_cn") {
         str s = str_from_cn("Disaster", 5);
         asserteq_int(str_cmpc(s, "Disas"), 0);
-        assert(!strcmp(s.b, "Disas"));
+        asserteq_str(s.b, "Disas");
         asserteq_int(s.l, 5);
     }
 
@@ -212,7 +202,7 @@ describe(str) {
         str s = str_from_c("Paper Machine");
         str sub = str_substr(s, 4, 8);
         asserteq_int(sub.l, 5);
-        assert(!strcmp(sub.b, "r Mac"));
+        asserteq_str(sub.b, "r Mac");
         assert(!str_cmpc(sub, "r Mac"));
         free(sub.b);
     } 
@@ -231,7 +221,7 @@ describe(str) {
         strcpy(p, "Dynamic String");
         struct str s = str_from_copy_c(p);
         free(p);
-        assert(!strcmp(s.b, "Dynamic String"));
+        asserteq_str(s.b, "Dynamic String");
         free(s.b);
         assert(!str_cmpc(s, "Dynamic String"));
     }
@@ -247,7 +237,7 @@ describe(str) {
         str *s2 = str_dup(s);
         assert(s2);
         assert(s2->b == s.b);
-        assert(!strcmp(s2->b, s.b));
+        asserteq_str(s2->b, s.b);
         free(s2);
     }
 
@@ -357,9 +347,9 @@ describe(json) {
         dup = strdup(j);
         sjsontokarr toks = sjson_lex(dup);
         sjson *json = sjson_parse(&toks);
-        assert(!strcmp(json->childvalue->key, "key"));;
-        assert(!strcmp(json->childvalue->stringvalue, "value"));;
-        assert(!strcmp(json->childvalue->next->key, "num"));
+        asserteq_str(json->childvalue->key, "key");;
+        asserteq_str(json->childvalue->stringvalue, "value");;
+        asserteq_str(json->childvalue->next->key, "num");
         assert(json->childvalue->next->numbervalue == -2839.489);
         free(dup);
         sjson_free(json);

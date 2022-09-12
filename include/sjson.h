@@ -32,6 +32,9 @@
  * stringvalue store string if type is string
  * numbervalue store double number if type is number
  *
+ * TODO
+ *     finish objectget arrayget objectset arrayset objectdel arraydel
+ *
  */
 
 #ifndef SHEEP_SJSON_H
