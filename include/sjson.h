@@ -6,7 +6,9 @@
  *     ** sjson_lex does modify the string,
  *     so you must use strdup on string literal
  *
- *     sjson *json = sjson_parse(toks);
+ *     sjson *json = sjson_serialize(char *s);
+ *
+ *     sjson_free(sjson);
  *
  *  sjson type store everything, 
  *
@@ -80,7 +82,6 @@ static int sjson_iswhitespace(char c) {
     SJSON_X(SJSON_TKCOMMA), \
     SJSON_X(SJSON_TKCOLON),
 
-
 #define SJSON_X(a) a
 enum sjson_type { SJSON_TYPES_LIST };
 enum sjson_err { SJSON_ERRORS_LIST };
@@ -125,8 +126,7 @@ sjson *sjson_serialize(char *s);
 void sjson_deserialize(FILE *fp, sjson *json);
 
 sjson *sjson_parse(sjsontokarr *toks);
-sjsontokarr *sjson_lex(char *s);
-void sjsontokarr_free(sjsontokarr *toks);
+sjsontokarr sjson_lex(char *s);
 
 sjson *sjson_array_get(sjson *json, size_t i);
 void sjson_array_set(sjson *json, char *key, sjson *value);
@@ -155,7 +155,6 @@ void sjson_register_logger(int (*logger)(const char*, ...));
 #define SJSON_FREE free
 #endif /* SJSON_FREE */
 
-
 #endif /* SHEEP_SJSON_H */
 
 #ifdef SHEEP_SJSON_IMPLEMENTATION
@@ -183,8 +182,7 @@ static char getescape(char c) {
     }
 }
 
-#define SJSON_LOG(errnum) \
-    logger("%s\n", sjson_errnames[errnum])
+#define SJSON_LOG(errnum) logger("%s\n", sjson_errnames[errnum])
 
 int sjson_logger_dummy(const char *fmt, ...);
 static int (*logger)(const char*, ...) = sjson_logger_dummy;
@@ -195,12 +193,6 @@ void sjson_register_logger(int (*newlogger)(const char*, ...)) {
     logger = newlogger;
 }
 
-sjson *sjson_new(int type) {
-    sjson *sj = SJSON_CALLOC(1, sizeof(sjson));
-    sj->type = type;
-    return sj;
-}
-
 sjsontok sjsontok_new(int type, char *start, char *end) {
     return (sjsontok) {
         .type = type,
@@ -209,42 +201,42 @@ sjsontok sjsontok_new(int type, char *start, char *end) {
     };
 }
 
-sjsontokarr *sjsontokarr_new() {
-    sjsontokarr *arr = malloc(sizeof(sjsontokarr));
-    arr->length = 0,
-    arr->capacity = 4,
-    arr->cur = 0;
-    arr->a = malloc(sizeof (sjsontok) * arr->capacity);
+sjsontokarr sjsontokarr_new() {
+    sjsontokarr arr;
+    arr.length = 0;
+    arr.capacity = 4;
+    arr.cur = 0;
+    arr.a = SJSON_MALLOC(sizeof(*arr.a) * arr.capacity);
     return arr;
 }
 
 void sjsontokarr_push(sjsontokarr *arr, sjsontok tok) {
     if (arr->length == arr->capacity)
-        arr->a = SJSON_REALLOC(arr->a, sizeof (sjsontok) * (arr->capacity *= 2));
+        arr->a = SJSON_REALLOC(arr->a, sizeof(sjsontok) * (arr->capacity *= 2));
     arr->a[arr->length++] = tok;
 }
 
-sjsontokarr *sjson_lex(char *s) {
-    sjsontokarr *arr = sjsontokarr_new();
+sjsontokarr sjson_lex(char *s) {
+    sjsontokarr arr = sjsontokarr_new();
     while (*s) {
         switch (*s) {
             case '[':
-                sjsontokarr_push(arr, sjsontok_new(SJSON_TKLSQUAREBRACKET, s, s));
+                sjsontokarr_push(&arr, sjsontok_new(SJSON_TKLSQUAREBRACKET, s, s));
                 break;
             case ']': 
-                sjsontokarr_push(arr, sjsontok_new(SJSON_TKRSQUAREBRACKET, s, s));
+                sjsontokarr_push(&arr, sjsontok_new(SJSON_TKRSQUAREBRACKET, s, s));
                 break;
             case '{': 
-                sjsontokarr_push(arr, sjsontok_new(SJSON_TKLBRACE, s, s));
+                sjsontokarr_push(&arr, sjsontok_new(SJSON_TKLBRACE, s, s));
                 break;
             case '}': 
-                sjsontokarr_push(arr, sjsontok_new(SJSON_TKRBRACE, s, s));
+                sjsontokarr_push(&arr, sjsontok_new(SJSON_TKRBRACE, s, s));
                 break;
             case ',':
-                sjsontokarr_push(arr, sjsontok_new(SJSON_TKCOMMA, s, s));
+                sjsontokarr_push(&arr, sjsontok_new(SJSON_TKCOMMA, s, s));
                 break;
             case ':':
-                sjsontokarr_push(arr, sjsontok_new(SJSON_TKCOLON, s, s));
+                sjsontokarr_push(&arr, sjsontok_new(SJSON_TKCOLON, s, s));
                 break;
             case '0':
             case '1':
@@ -263,7 +255,7 @@ sjsontokarr *sjson_lex(char *s) {
                 while (sjson_isdigit(*s))
                     s++;
                 s--;
-                sjsontokarr_push(arr, sjsontok_new(SJSON_TKNUMBERLITERAL, start, s));
+                sjsontokarr_push(&arr, sjsontok_new(SJSON_TKNUMBERLITERAL, start, s));
                 break;
             }
             case '"':
@@ -276,19 +268,19 @@ sjsontokarr *sjson_lex(char *s) {
                     s++;
                 }
                 *s = 0;
-                sjsontokarr_push(arr, sjsontok_new(SJSON_TKSTRINGLITERAL, start, s-1));
+                sjsontokarr_push(&arr, sjsontok_new(SJSON_TKSTRINGLITERAL, start, s-1));
                 break;
             }
             case 'n':
-                sjsontokarr_push(arr, sjsontok_new(SJSON_TKNULL, s, s+3));
+                sjsontokarr_push(&arr, sjsontok_new(SJSON_TKNULL, s, s+3));
                 s += 3;
                 break;
             case 't':
-                sjsontokarr_push(arr, sjsontok_new(SJSON_TKTRUE, s, s+3));
+                sjsontokarr_push(&arr, sjsontok_new(SJSON_TKTRUE, s, s+3));
                 s += 3;
                 break;
             case 'f':
-                sjsontokarr_push(arr, sjsontok_new(SJSON_TKFALSE, s, s+4));
+                sjsontokarr_push(&arr, sjsontok_new(SJSON_TKFALSE, s, s+4));
                 s += 4;
                 break;
             case ' ':
@@ -342,6 +334,20 @@ sjson *sjson_parsearray(sjsontokarr *toks) {
     return obj;
 }
 
+sjson *sjson_new(int type) {
+    sjson *json = SJSON_CALLOC(1, sizeof(*json));
+    json->type = type;
+    return json;
+}
+
+void sjson_free(sjson *json) {
+    if (json->childvalue)
+        sjson_free(json->childvalue);
+    if (json->next)
+        sjson_free(json->next);
+    SJSON_FREE(json);
+}
+
 sjson *sjson_parse(sjsontokarr *toks) {
     if (toks->cur >= toks->length)
         return sjson_new(SJSON_INVALID);
@@ -377,7 +383,6 @@ sjson *sjson_parse(sjsontokarr *toks) {
         default:
             logger("Unknown token: %s %s\n", sjson_tokennames[tok.type], tok.start);
             return NULL;
-            ;
     }
 }
 
@@ -434,16 +439,14 @@ sjson *sjson_array_get(sjson *json, size_t i) {
 }
 
 sjson *sjson_serialize(char *s) {
-    sjsontokarr *toks = sjson_lex(s);
-    sjson *json = sjson_parse(toks);
-    sjsontokarr_free(toks);
+    sjsontokarr toks = sjson_lex(s);
+    sjson *json = sjson_parse(&toks);
+    SJSON_FREE(toks.a);
     return json;
 }
 
 void sjson_deserialize(FILE *fp, sjson *json) {
     switch (json->type) {
-        case SJSON_INVALID:
-            break;
         case SJSON_NUMBER:
             fprintf(fp, "%lf", json->numbervalue);
             break;
@@ -466,7 +469,6 @@ void sjson_deserialize(FILE *fp, sjson *json) {
                 sjson_deserialize(fp, it);
                 if (it->next != NULL)
                     fprintf(fp, ",");
-                fprintf(fp, "\n");
             }
             fprintf(fp, "}");
             break;
@@ -476,38 +478,14 @@ void sjson_deserialize(FILE *fp, sjson *json) {
                 sjson_deserialize(fp, it);
                 if (it->next != NULL)
                     fprintf(fp, ",");
-                fprintf(fp, "\n");
             }
             fprintf(fp, "]");
             break;
+        case SJSON_INVALID:
         default:
             SJSON_LOG(SJSON_INVALID_TYPE);
             break;
     }
 }
-
-void sjsontokarr_free(sjsontokarr *toks) {
-    SJSON_FREE(toks->a);
-}
-
-/*
-void sjson_print_tokarr(sjsontokarr *arr) {
-    for (int i =0 ; i< arr->length; i++)
-         printf("%s %.*s\n", sjson_tokennames[arr->a[i].type], arr->a[i].end - arr->a[i].start + 1,  arr->a[i].start);
-}
-
-void sjson_debug_print(sjson *j, int indent) {
-    if (j == NULL) {
-        SJSON_LOG(SJSON_NULL_REFERENCE);
-        return;
-    }
-    for (int i = 0; i < indent; i++)
-        printf(" ");
-    printf("JSON :   type = %d   name = %s   num = %5.6lf   str = %s\n",
-            j->type, j->key, j->numbervalue, j->stringvalue);
-    if (j->childvalue) sjson_debug_print(j->childvalue, indent+1);
-    if (j->next) sjson_debug_print(j->next, indent);
-}
-*/
 
 #endif /* SHEEP_SJSON_IMPLEMENTATION */

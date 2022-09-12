@@ -116,6 +116,7 @@ describe(dynarray) {
             arrins(a, i, i);
             assert(a[i] == i);
         }
+        arrfree(a);
     }
 
     it("arrsetlen_test") {
@@ -128,6 +129,7 @@ describe(dynarray) {
         arrpush(a, -1);
         asserteq_int(arrlen(a), 501);
         assert(a[500] == -1);
+        arrfree(a);
     }
 
     it("arrpop_test") {
@@ -152,6 +154,7 @@ describe(dynarray) {
         arrpush(sa, ee);
         asserteq_int(arrpop(sa).a, 1);
         asserteq_int(arrpop(sa).b, 5);
+        arrfree(a);
     }
 
     it("arrmembsize_test") {
@@ -159,8 +162,10 @@ describe(dynarray) {
         assert(dynarray_membsize(a) == sizeof(int));
         a = arrnew(long);
         assert(dynarray_membsize(a) == sizeof(long));
+        arrfree(a);
         a = arrnew(char);
         assert(dynarray_membsize(a) == sizeof(char));
+        arrfree(a);
     }
 }
 
@@ -171,6 +176,7 @@ describe(str) {
         asserteq_int(s.l, 0);
         assert(s.c == SHEEP_STR_INIT_CAP);
         assert(!strcmp(s.b, ""));
+        free(s.b);
     }
 
     it("strcat_test") {
@@ -182,6 +188,8 @@ describe(str) {
         assert(!strcmp(s.b, "Hello World"));
         str_cat(&s, s2);
         assert(!strcmp(s.b, "Hello WorldPOG"));
+        free(s.b);
+        free(s2.b);
         /* undefined behaviour
         str_cat(&s, s);
         assert(!strcmp(s.b, "Hello WorldHello World"));
@@ -206,6 +214,7 @@ describe(str) {
         asserteq_int(sub.l, 5);
         assert(!strcmp(sub.b, "r Mac"));
         assert(!str_cmpc(sub, "r Mac"));
+        free(sub.b);
     } 
 
     it("str_cmp") {
@@ -221,9 +230,9 @@ describe(str) {
         char *p = malloc(1000);
         strcpy(p, "Dynamic String");
         struct str s = str_from_copy_c(p);
-        assert(!strcmp(s.b, "Dynamic String"));
-        assert(!str_cmpc(str_from_c(p), "Dynamic String"));
         free(p);
+        assert(!strcmp(s.b, "Dynamic String"));
+        free(s.b);
         assert(!str_cmpc(s, "Dynamic String"));
     }
 
@@ -239,12 +248,14 @@ describe(str) {
         assert(s2);
         assert(s2->b == s.b);
         assert(!strcmp(s2->b, s.b));
+        free(s2);
     }
 
     it("str_aprintf") {
-        str *p = str_aprintf("%d, POOG", 500);
-        asserteq_str(p->b, "500, POOG");
-        asserteq_int(p->l, 9);
+        str p = str_aprintf("%d, POOG", 500);
+        asserteq_str(p.b, "500, POOG");
+        asserteq_int(p.l, 9);
+        free(p.b);
     }
 
     it("str_find_sub") {
@@ -294,6 +305,7 @@ describe(str) {
         assert(!str_cmpc(sp.a[0], "Welcome"));
         assert(!str_cmpc(sp.a[1], "To"));
         assert(!str_cmpc(sp.a[2], "Farm"));
+        strarray_free(&sp);
     }
 }
 
@@ -306,6 +318,7 @@ describe(algo) {
         for (j = 0; j < n - 1; j++)
             assert(a[j] <= a[j+1]);
     }
+    arrfree(a);
 
     a = arrnew(int);
     for (int i = 0; i < n; i++)
@@ -334,42 +347,59 @@ describe(algo) {
         }
         assert(slowerbound_int(n+1, a, n) == NULL);
     }
+    arrfree(a);
 }
 
 describe(json) {
     it("parse") {
-        char *j;
+        char *j, *dup;
         j = "{ \"key\": \"value\", \"num\": -2839.489 } ";
-        sjsontokarr *toks = sjson_lex(strdup(j));
-        sjson *json = sjson_parse(toks);
+        dup = strdup(j);
+        sjsontokarr toks = sjson_lex(dup);
+        sjson *json = sjson_parse(&toks);
         assert(!strcmp(json->childvalue->key, "key"));;
         assert(!strcmp(json->childvalue->stringvalue, "value"));;
         assert(!strcmp(json->childvalue->next->key, "num"));
         assert(json->childvalue->next->numbervalue == -2839.489);
+        free(dup);
+        sjson_free(json);
     }
 
+    char *dup;
     it("parse null") {
-        sjson *j = sjson_serialize(strdup("null"));
+        dup = strdup("null");
+        sjson *j = sjson_serialize(dup);
         asserteq_int(j->type, SJSON_NULL);
+        sjson_free(j);
+        free(dup);
     }
 
     it("parse false") {
-        sjson *j = sjson_serialize(strdup("false"));
+        dup = strdup("false");
+        sjson *j = sjson_serialize(dup);
         asserteq_int(j->type, SJSON_FALSE);
+        sjson_free(j);
+        free(dup);
     }
 
     it("parse true") {
-        sjson *j = sjson_serialize(strdup("true"));
+        dup = strdup("true");
+        sjson *j = sjson_serialize(dup);
         asserteq_int(j->type, SJSON_TRUE);
+        sjson_free(j);
+        free(dup);
     }
 
     it("parse positive int") {
         const char *nums[] = { "2", "3", "4", "5", "6", "10000" };
         const int ans[] = { 2, 3, 4, 5, 6, 10000 };
         for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
-            sjson *j = sjson_serialize(strdup(nums[i]));
+            dup = strdup(nums[i]);
+            sjson *j = sjson_serialize(dup);
             asserteq_int(j->type, SJSON_NUMBER);
             asserteq_dbl(j->numbervalue, ans[i]);
+            sjson_free(j);
+            free(dup);
         }
     }
 
@@ -377,18 +407,23 @@ describe(json) {
         const char *nums[] = { "-2", "-3", "-4", "-5", "-6", "-10000" };
         const int ans[] = { -2, -3, -4, -5, -6, -10000 };
         for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
-            sjson *j = sjson_serialize(strdup(nums[i]));
+            dup = strdup(nums[i]);
+            sjson *j = sjson_serialize(dup);
             asserteq_int(j->type, SJSON_NUMBER);
             asserteq_dbl(j->numbervalue, ans[i]);
+            free(dup);
+            sjson_free(j);
         }
     }
 
     it("parse zero") {
         const char *nums[] = { "0", "00", "000", "0000", "00000" };
         for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
-            sjson *j = sjson_serialize(strdup(nums[i]));
+            dup = strdup(nums[i]);
+            sjson *j = sjson_serialize(dup);
             asserteq_int(j->type, SJSON_NUMBER);
             asserteq_dbl(j->numbervalue, 0);
+            free(dup);
         }
     }
 
@@ -396,9 +431,11 @@ describe(json) {
         const char *nums[] = { "2.213", "3.9203", "4.23", "5.738", "6.01", "10000.389" };
         const double ans[] = { 2.213, 3.9203, 4.23, 5.738, 6.01, 10000.389 };
         for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
-            sjson *j = sjson_serialize(strdup(nums[i]));
+            dup = strdup(nums[i]);
+            sjson *j = sjson_serialize(dup);
             asserteq_int(j->type, SJSON_NUMBER);
             asserteq_dbl(j->numbervalue, ans[i]);
+            free(dup);
         }
     }
 
@@ -406,9 +443,11 @@ describe(json) {
         const char *nums[] = { "-2.213", "-3.9203", "-4.23", "-5.738", "-6.01", "-10000.389" };
         const double ans[] = { -2.213, -3.9203, -4.23, -5.738, -6.01, -10000.389 };
         for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
+            dup = strdup(nums[i]);
             sjson *j = sjson_serialize(strdup(nums[i]));
             asserteq_int(j->type, SJSON_NUMBER);
             asserteq_dbl(j->numbervalue, ans[i]);
+            free(dup);
         }
     }
 
@@ -416,9 +455,12 @@ describe(json) {
         char *strs[] = { "\"POOOG\"", "\"SHIEN\"", "\"WATER\"", "\"Kronii\"" };
         char *ans[] = { "POOOG", "SHIEN", "WATER", "Kronii" };
         for (int i = 0; i < sizeof strs / sizeof *strs; i++) {
-            sjson *j = sjson_serialize(strdup(strs[i]));
+            dup = strdup(strs[i]);
+            sjson *j = sjson_serialize(dup);
             asserteq_int(j->type, SJSON_STRING);
             asserteq_str(j->stringvalue, ans[i]);
+            sjson_free(j);
+            free(dup);
         }
     }
 

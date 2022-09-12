@@ -27,11 +27,10 @@ int main() {
     sjson_register_logger(printf);
     for (int i =0  ;i < sizeof tests / sizeof *tests; i++) {
         puts(tests[i]);
-        sjsontokarr *toks;
-        toks = sjson_lex(strdup(tests[i]));
-        sjson *json;
-        json = sjson_parse(toks);
-        //sjson_debug_print(json, 0);
+        char *dup = strdup(tests[i]);
+        sjson *json = sjson_serialize(dup);
         sjson_deserialize(stdout, json);
+        sjson_free(json);
+        free(dup);
     }
 }

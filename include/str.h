@@ -81,15 +81,19 @@
 #ifndef STR_MALLOC
 #include <stdlib.h>
 #define STR_MALLOC malloc
-#endif
+#endif /* STR_MALLOC */
 #ifndef STR_REALLOC
 #include <stdlib.h>
 #define STR_REALLOC realloc
-#endif
+#endif /* STR_REALLOC */
 #ifndef STR_CALLOC
 #include <stdlib.h>
 #define STR_CALLOC calloc
-#endif
+#endif /* STR_CALLOC */
+#ifndef STR_FREE
+#include <stdlib.h>
+#define STR_FREE free
+#endif /* STR_FREE */
 
 #include <stddef.h>
 #include <stdio.h>
@@ -120,7 +124,7 @@ struct str *str_dup(struct str s);
 void        str_cat(struct str* s, struct str n);
 void        str_resize(struct str* s, size_t newsz);
 void        str_advance(struct str* s, size_t n);
-struct str *str_aprintf(const char* fmt, ...);
+struct str  str_aprintf(const char* fmt, ...);
 void        str_ensure_empty(struct str *s, size_t n);
 
 #define str_cmpc(a, p) str_cmp(a, str_from_copy_c(p))
@@ -181,7 +185,6 @@ struct str str_from_copy_c(char *p) {
 		return s;
     s.l = strlen(p);
     str_ensure_empty(&s, s.l);
-    str_resize(&s, s.c);
     memcpy(s.b, p, s.l);
     return s;
 }
@@ -243,6 +246,8 @@ size_t str_find_sub(struct str haystack, struct str needle) {
 }
 
 void str_ensure_empty(struct str *s, size_t n) {
+    if (s->c == 0)
+        *s = str_new();
     while (s->c - s->l < n)
         s->c *= 2;
     str_resize(s, s->c);
@@ -267,23 +272,23 @@ size_t __sprintf_sz(const char* fmt, ...) {
 	return len;
 }
 
-struct str* str_aprintf(const char* fmt, ...) {
+struct str str_aprintf(const char* fmt, ...) {
     size_t len;
 	va_list args;
 	va_start(args, fmt);
 	len = __sprintf_sz(fmt, args);
 	va_end(args);
-	struct str *s = str_new_alloc();
-    str_resize(s, len);
+	struct str s = str_new();
+    s.l = len;
+    str_ensure_empty(&s, s.l);
 	va_start(args, fmt);
-	vsnprintf(s->b, len, fmt, args);
+	vsnprintf(s.b, len, fmt, args);
 	va_end(args);
-    s->l = strlen(s->b);
 	return s;
 }
 
 struct str* str_dup(struct str s) {
-    struct str* ret = STR_CALLOC(1, sizeof(*ret));
+    struct str* ret = STR_MALLOC(sizeof(*ret));
     ret->c = s.c;
     ret->l = s.l;
     ret->b = s.b;
@@ -319,6 +324,12 @@ struct strarray strarray_new() {
     a.l = 0;
     a.a = STR_MALLOC(sizeof(struct str) * a.c);
     return a;
+}
+
+void strarray_free(struct strarray *arr) {
+    for (int i = 0; i < arr->l; i++)
+        STR_FREE(arr->a[i].b);
+    STR_FREE(arr->a);
 }
 
 void strarray_push(struct strarray *a, struct str s) {
