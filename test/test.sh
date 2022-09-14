@@ -1,6 +1,5 @@
 #!/bin/sh
 for f in *.c
 do
-    cc "$f" -o "$f.out" -g3 -fsanitize=address,undefined 
+    cc "$f" -o "$f.out" ../src/sjson.c -g
 done
-export ASAN_OPTIONS=abort_on_error=1

@@ -13,7 +13,7 @@ None of these library depend on each other.
     front of array containing information
     about the dynarray
 
-- ssort.h 
+- algo.h 
     : mergesort, binarysearch, upperbound, lowerbound
 
 - xmalloc.h 
@@ -23,18 +23,15 @@ None of these library depend on each other.
 - str.h 
     : C-string is disaster, trying to fix that
 
+- sjson.h
+    : json serializer, deserializer
+
 # installation:
 
 You can either use sheeplib as single header library or shared Library
 
 To use as single header library, simply copy
-include/header.h to your project tree.
-
-To install shared library, use cmake
-
-    mkdir build
-    cmake ..
-    sudo make install
+header.h to your project tree.
 
 # usage:
 
@@ -45,11 +42,6 @@ you will need to define SHEEP_HEADER_IMPLEMENTATION before using it
     #include <sheeplib/algo.h>
 
 for further information, read the document in header file itself
-
-# notes:
-
-the .c files are just there for building as shared library,
-you only need the .h file if you want to use this as single header library
 
 # instructions
 
