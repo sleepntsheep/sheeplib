@@ -45,10 +45,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-static int sjson_iswhitespace(char c) {
-    return c == ' ' || c == '\n' || c == '\t';
-}
-
 #define SJSON_TYPES_LIST \
     SJSON_X(SJSON_INVALID),\
     SJSON_X(SJSON_NULL),   \
@@ -91,7 +87,7 @@ typedef struct sjson {
     int type;
 	struct {
 		double num;
-		const char *str;
+		char *str;
 		struct sjson *child;
 		struct sjson *tail;
 	} v;
@@ -99,13 +95,13 @@ typedef struct sjson {
     struct sjson *next;
     struct sjson *prev;
 	/* for object child */
-    const char *key;
+    char *key;
 } sjson;
 
 typedef struct sjsontok {
     int type;
-    const char *start;
-    const char *end;
+    char *start;
+    char *end;
 } sjsontok;
 
 typedef struct sjsontokarr {
@@ -115,8 +111,8 @@ typedef struct sjsontokarr {
 } sjsontokarr;
 
 typedef struct sjsonlexer {
-	const char *start, *end;
-	const char *c;
+	char *start, *end;
+	char *c;
 	sjsontokarr toks;
 } sjsonlexer;
 
@@ -131,10 +127,10 @@ typedef struct sjsonparser {
 sjson *sjson_new(int type);
 void sjson_free(sjson *json);
 
-sjson *sjson_serialize(const char *s, size_t len);
+sjson *sjson_serialize(char *s, size_t len);
 sjsonbuf sjson_deserialize(sjson *json);
 
-void sjsonlexer_init(sjsonlexer *lexer, const char *s, size_t len);
+void sjsonlexer_init(sjsonlexer *lexer, char *s, size_t len);
 bool sjsonlexer_lex(sjsonlexer *lexer);
 sjson *sjson_parse(sjsontokarr *toks);
 
@@ -150,11 +146,11 @@ bool sjson_deletechild(sjson *json, sjson *child);
 
 #define sjson_array_push sjson_addchild
 
-void sjson_register_logger(int (*logger)(const char*, ...));
+void sjson_register_logger(int (*logger)(char*, ...));
 
-static int sjson_logger_dummy(const char *fmt, ...) {return 0;}
+static int sjson_logger_dummy(char *fmt, ...) {return 0;}
 
-static int (*logger)(const char*, ...) = sjson_logger_dummy;
+static int (*logger)(char*, ...) = sjson_logger_dummy;
 
 #endif /* SHEEP_SJSON_H */
 
@@ -200,7 +196,7 @@ static sjsontok sjsontokarr_peek(sjsontokarr *arr) {
     return arr->a[arr->cur];
 }
 
-static void sjsonlexer_pushtok(sjsonlexer *lexer, int type, const char *start, const char *end) {
+static void sjsonlexer_pushtok(sjsonlexer *lexer, int type, char *start, char *end) {
     sjsontokarr_push(&lexer->toks, (sjsontok){type, start, end});
 }
 
@@ -210,7 +206,7 @@ static void sjsonbuf_init(sjsonbuf *buf) {
     buf->buf = malloc(buf->cap);
 }
 
-static void sjsonbuf_push(sjsonbuf *buf, const void *s, size_t len) {
+static void sjsonbuf_push(sjsonbuf *buf, void *s, size_t len) {
     while (buf->cap - buf->len <= len + 1)
         buf->cap *= 2;
     buf->buf = realloc(buf->buf, buf->cap);
@@ -219,7 +215,7 @@ static void sjsonbuf_push(sjsonbuf *buf, const void *s, size_t len) {
     buf->buf[buf->len] = '\x0';
 }
 
-void sjson_register_logger(int (*newlogger)(const char*, ...)) {
+void sjson_register_logger(int (*newlogger)(char*, ...)) {
     logger = newlogger;
 }
 
@@ -237,7 +233,7 @@ static bool sjsonlexer_isend(sjsonlexer *lexer) {
     return lexer->c >= lexer->end;
 }
 
-void sjsonlexer_init(sjsonlexer *lexer, const char *s, size_t len) {
+void sjsonlexer_init(sjsonlexer *lexer, char *s, size_t len) {
     lexer->start = s,
     lexer->end = s + len,
     lexer->c = s,
@@ -245,7 +241,7 @@ void sjsonlexer_init(sjsonlexer *lexer, const char *s, size_t len) {
 }
 
 static bool sjsonlexer_lexnumber(sjsonlexer *lexer) {
-    const char *numberstart = lexer->c;
+    char *numberstart = lexer->c;
     bool didpoint = false, didsign = false;
     sjsonbuf buf;
     sjsonbuf_init(&buf);
@@ -283,8 +279,7 @@ bad:
 static bool sjsonlexer_lexstring(sjsonlexer *lexer) {
     if (sjsonlexer_advance(lexer) != '\"')
         return false; /* not string, cope */
-    const char *stringstart = lexer->c;
-    const char *stringend = lexer->c;
+    char *stringend = lexer->c;
 
     /* find terminating double quote, need to escape \" */
     while (stringend[0] != '\"') {
@@ -456,7 +451,7 @@ static sjson *sjson_parseobject(sjsontokarr *toks) {
         goto bad;
 
     while (sjsontokarr_peek(toks).type != SJSON_TKRBRACE) {
-        const char *key = sjsontokarr_advance(toks).start;
+        char *key = sjsontokarr_advance(toks).start;
         sjson *child;
         if (sjsontokarr_advance(toks).type != SJSON_TKCOLON)
             goto bad;
@@ -513,7 +508,7 @@ bad:
 }
 
 sjson *sjson_parse(sjsontokarr *toks) {
-    sjson *ret;
+    sjson *ret = NULL;
     switch (sjsontokarr_peek(toks).type) {
         case SJSON_TKTRUE:
             ret = sjson_new(SJSON_TRUE);
@@ -543,6 +538,8 @@ sjson *sjson_parse(sjsontokarr *toks) {
             return NULL;
     }
     sjsontokarr_advance(toks);
+    if (ret == NULL)
+        ret = sjson_new(SJSON_INVALID);
     return ret;
 }
 
@@ -625,15 +622,17 @@ bad:
     return NULL;
 }
 
-sjson *sjson_serialize(const char *s, size_t len) {
+sjson *sjson_serialize(char *s, size_t len) {
     sjsonlexer lexer;
     sjson *json;
     sjsonlexer_init(&lexer, s, len);
-    sjsonlexer_lex(&lexer);
-    json = sjson_parse(&lexer.toks);
-    free(lexer.toks.a);
+    if (!sjsonlexer_lex(&lexer))
+        goto bad;
+    if ((json = sjson_parse(&lexer.toks)) == NULL)
+        goto bad;
     return json;
 bad:
+    free(lexer.toks.a);
     return NULL;
 }
 
@@ -649,7 +648,8 @@ sjsonbuf sjson_deserialize(sjson *json) {
             break;
         }
         case SJSON_STRING:
-            for (const char *c = json->v.str; *c; c++) {
+            sjsonbuf_push(&s, "\"", 1);
+            for (char *c = json->v.str; *c; c++) {
                 switch (*c) {
                     case '\"':
                         sjsonbuf_push(&s, "\\\"", 2);
@@ -677,6 +677,7 @@ sjsonbuf sjson_deserialize(sjson *json) {
                         break;
                 }
             }
+            sjsonbuf_push(&s, "\"", 1);
             break;
         case SJSON_NULL:
             sjsonbuf_push(&s, "null", 4);
@@ -685,13 +686,14 @@ sjsonbuf sjson_deserialize(sjson *json) {
             sjsonbuf_push(&s, "true", 4);
             break;
         case SJSON_FALSE:
-            sjsonbuf_push(&s, "false", 4);
+            sjsonbuf_push(&s, "false", 5);
             break;
         case SJSON_OBJECT:
             sjsonbuf_push(&s, "{", 1);
             sjson_foreach(json, it) {
                 sjsonbuf_push(&s, "\"", 1);
                 sjsonbuf_push(&s, it->key, strlen(it->key));
+                sjsonbuf_push(&s, "\"", 1);
                 sjsonbuf_push(&s, ":", 1);
                 sjsonbuf childbuf = sjson_deserialize(it);
                 sjsonbuf_push(&s, childbuf.buf, childbuf.len);

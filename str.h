@@ -119,7 +119,7 @@ struct str  str_from_cn(char *p, size_t n);
 struct str  str_from_copy_c(char *p);
 struct str  str_substr(struct str str, size_t start, size_t end);
 int         str_cmp(struct str a, struct str b);
-size_t      str_find_sub(struct str haystack, struct str needle);
+long        str_find_sub(struct str haystack, struct str needle);
 struct str *str_dup(struct str s);
 void        str_cat(struct str* s, struct str n);
 void        str_resize(struct str* s, size_t newsz);
@@ -224,7 +224,7 @@ void str_cat(struct str *s, struct str n) {
 	s->l += n.l;
 }
 
-size_t str_find_sub(struct str haystack, struct str needle) {
+long str_find_sub(struct str haystack, struct str needle) {
     /* kmp algo */
     size_t m = 0;
     if (haystack.l < needle.l) return -1;
@@ -288,8 +288,7 @@ struct str* str_dup(struct str s) {
 }
 
 struct strarray str_split(struct str s, struct str delim) {
-    size_t length = 0, capacity = 4;
-    size_t i, lastdelim;
+    long i;
     struct strarray arr;
     arr = strarray_new();
 	for (;;)
