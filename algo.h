@@ -41,13 +41,9 @@
 
 #define SALGO_DECL(type,cmpfnc)\
     void ssort__##type(type *base, size_t nmemb);\
-\
     type *sbsearch_##type(type key, type *base, size_t nmemb);\
-\
     type *supperbound_##type(type key, type *base, size_t nmemb);\
-\
     type *slowerbound_##type(type key, type *base, size_t nmemb);\
-\
     type *slsearch_##type(type key, type *base, size_t nmemb);\
 \
     void ssort_merge_##type(type *base, size_t left,\

@@ -4,12 +4,14 @@
 #include <time.h>
 #include <stdlib.h>
 #define SHEEP_DYNARRAY_IMPLEMENTATION
-#include "../include/dynarray.h"
+#include "../dynarray.h"
 #define SHEEP_STR_IMPLEMENTATION
-#include "../include/str.h"
-#include "../include/algo.h"
+#include "../str.h"
+#include "../algo.h"
 #define SHEEP_SJSON_IMPLEMENTATION
-#include "../include/sjson.h"
+#include "../sjson.h"
+#define SHEEP_LOG_IMPLEMENTATION
+#include "../log.h"
 #define SNOW_ENABLED
 #include "snow.h"
 
@@ -531,25 +533,39 @@ describe(json) {
     }
 
     it("parse non empty object") {
-        char *s = strdup("{}");
-        sjson *j = sjson_serialize(s, strlen(s));
-        asserteq_int(j->type, SJSON_OBJECT);
-        asserteq_ptr(j->v.child, nullptr);
-        asserteq_ptr(j->v.tail, nullptr);
-    }
-
-    it("parse") {
         char *j;
         j = "{ \"key\": \"value\", \"num\": -2839.489 } ";
         sjson *json = sjson_serialize(j, strlen(j));
         assert(json);
         asserteq_int(json->type, SJSON_OBJECT);
-        assertneq_ptr(json->v.child, nullptr);
+        assertneq_ptr(json->v.child, NULL);
         asserteq_str(json->v.child->key, "key");;
         asserteq_str(json->v.child->v.str, "value");;
         asserteq_str(json->v.child->next->key, "num");
         assert(json->v.child->next->v.num == -2839.489);
         sjson_free(json);
+    }
+
+    it("parse nested object") {
+        char *j;
+        j = "{ \"key\": \"value\", \"nest\": {} } ";
+        sjson *json = sjson_serialize(j, strlen(j));
+        assert(json);
+        asserteq_int(json->type, SJSON_OBJECT);
+        assertneq_ptr(json->v.child, NULL);
+        asserteq_str(json->v.child->key, "key");;
+        asserteq_str(json->v.child->v.str, "value");;
+        asserteq_str(json->v.child->next->key, "nest");
+        asserteq_int(json->v.child->next->type, SJSON_OBJECT);
+        asserteq_ptr(json->v.child->next->v.child, NULL);
+        sjson_free(json);
+    }
+
+}
+
+describe(log) {
+    it("warn") {
+        warn("warn");
     }
 }
 

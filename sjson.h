@@ -13,18 +13,6 @@
  *  sjson type store everything, 
  *
 
-    typedef struct sjson {
-        struct sjson *next;
-        struct sjson *prev;
-        int type;
-        struct sjson *childvalue;
-        struct sjson *tail;
-        double numbervalue;
-        char *stringvalue;
-        char *key;
-        enum sjson_err err;
-    } sjson;
-
  * next and prev is used for doubly linked list in object and array
  * no hashmap is used here, doubly linked list is more simple, despite being O(n) lookup
  * childvalue store the doubly linked list of all child, if type is object or array
@@ -34,7 +22,7 @@
  *
  * TODO
  *     - finish objectget arrayget objectset arrayset objectdel arraydel
- *     - (done? except unicode )fix escape character annoying problem 
+ *     - (done? except unicode) fix escape character annoying problem 
  *         (both serializing and deserializing)
  *
  */
