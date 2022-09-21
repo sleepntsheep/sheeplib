@@ -136,7 +136,10 @@ bool sjson_deletechild(sjson *json, sjson *child);
 
 void sjson_register_logger(int (*logger)(char*, ...));
 
-static int sjson_logger_dummy(char *fmt, ...) {return 0;}
+static int sjson_logger_dummy(char *fmt, ...) {
+    (void) fmt; /* UNUSED */
+    return 0;
+}
 
 static int (*logger)(char*, ...) = sjson_logger_dummy;
 
@@ -165,13 +168,6 @@ static void sjsontokarr_push(sjsontokarr *arr, sjsontok tok) {
     if (arr->length == arr->capacity)
         arr->a = realloc(arr->a, sizeof(sjsontok) * (arr->capacity *= 2));
     arr->a[arr->length++] = tok;
-}
-
-void sjsontokarr_debug(sjsontokarr arr){ 
-    for (int i =0 ;i < arr.length;i++)
-    {
-        printf("%s\n", sjson_tokennames[arr.a[i].type]);
-    }
 }
 
 static sjsontok sjsontokarr_advance(sjsontokarr *arr) {
@@ -328,7 +324,7 @@ bad:
 
 bool sjsonlexer_lexprimitive(sjsonlexer *lexer) {
     int type;
-    size_t len;
+    ptrdiff_t len;
     switch (sjsonlexer_peek(lexer)) {
         case 't':
             type = SJSON_TKTRUE;
@@ -606,7 +602,6 @@ sjson *sjson_array_get(sjson *json, size_t i) {
     sjson_foreach(json, iter)
         if (x++ == i)
             return iter;
-bad:
     return NULL;
 }
 
@@ -618,19 +613,19 @@ sjson *sjson_serialize(char *s, size_t len) {
         goto bad;
     if ((json = sjson_parse(&lexer.toks)) == NULL)
         goto bad;
+    free(lexer.toks.a);
     return json;
 bad:
-    free(lexer.toks.a);
     return NULL;
 }
 
 sjsonbuf sjson_deserialize(sjson *json) {
-    char buf[1024];
     sjsonbuf s;
     sjsonbuf_init(&s);
     switch (json->type) {
         case SJSON_NUMBER:
         {
+			char buf[1024];
             size_t len = snprintf(buf, sizeof buf, "%lf", json->v.num);
             sjsonbuf_push(&s, buf, len);
             break;

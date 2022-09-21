@@ -91,7 +91,7 @@
  *
  * arrsort *won't* be implemented, just use qsort from stdlib
  * this library *cannot* be used in C++,
- * due to C++ not allowing C++ not allowing implicit pointer conversion
+ * due to C++ not allowing implicit pointer conversion
  * you shouldn't use this in C++ anyway, use std::vector
  * */
 
