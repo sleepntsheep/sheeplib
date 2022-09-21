@@ -2,13 +2,7 @@
  * sleepntsheep 2022 
  *
  * Usage - 
- *     sjsontokarr *toks = sjson_lex(strdup("{\"example\": \"json string\"}"));
- *     ** sjson_lex does modify the string,
- *     so you must use strdup on string literal
- *
- *     sjson *json = sjson_serialize(char *s);
- *
- *     sjson_free(sjson);
+ *      not existing documentation
  *
  *  sjson type store everything, 
  *
@@ -57,14 +51,30 @@
     SJSON_X(SJSON_TKCOMMA), \
     SJSON_X(SJSON_TKCOLON),
 
+#define SJSON_ERR_LIST \
+    SJSON_X(SJSON_SUCCESS), \
+    SJSON_X(SJSON_ERR_TRAILING_COMMA), \
+    SJSON_X(SJSON_ERR_NO_TERMINATING_BRACE), \
+    SJSON_X(SJSON_ERR_NO_TERMINATING_BRACKET), \
+    SJSON_X(SJSON_ERR_NO_MATCHING_MEMBER), \
+    SJSON_X(SJSON_ERR_NO_MEMORY), \
+    SJSON_X(SJSON_ERR_WRONG_TYPE), \
+    SJSON_X(SJSON_ERR_UNKNOWN_TOKEN), \
+    SJSON_X(SJSON_ERR_NO_TERMINATING_DOUBLE_QUOTE), \
+    SJSON_X(SJSON_ERR_INVALID_SOURCE), 
+
 #define SJSON_X(a) a
 enum sjson_type { SJSON_TYPES_LIST };
 enum sjson_tokens { SJSON_TOKENS_LIST };
+enum sjson_resultnum { SJSON_ERR_LIST };
 #undef SJSON_X
 #define SJSON_X(a) #a
 static const char *sjson_typenames[] = { SJSON_TYPES_LIST };
+static const char *sjson_errnames[] = { SJSON_ERR_LIST };
 static const char *sjson_tokennames[] = { SJSON_TOKENS_LIST };
 #undef SJSON_X
+
+typedef enum sjson_resultnum sjson_resultnum;
 
 typedef struct sjsonbuf {
 	size_t len, cap;
@@ -85,6 +95,11 @@ typedef struct sjson {
 	/* for object child */
     char *key;
 } sjson;
+
+typedef struct {
+    sjson *json;
+    int err;
+} sjson_result;
 
 typedef struct sjsontok {
     int type;
@@ -112,25 +127,25 @@ typedef struct sjsonparser {
 #define sjson_foreach(json, iter) \
     for (sjson *iter = (json)->v.child; (iter) != NULL; iter = (iter)->next) 
 
-sjson *sjson_new(int type);
+sjson_result sjson_new(int type);
 void sjson_free(sjson *json);
 
-sjson *sjson_serialize(char *s, size_t len);
+sjson_result sjson_serialize(const char *s, size_t len);
 sjsonbuf sjson_deserialize(sjson *json);
 
 void sjsonlexer_init(sjsonlexer *lexer, char *s, size_t len);
-bool sjsonlexer_lex(sjsonlexer *lexer);
-sjson *sjson_parse(sjsontokarr *toks);
+static sjson_resultnum sjsonlexer_lex(sjsonlexer *lexer);
+static sjson_result sjson_parse(sjsontokarr *toks);
 
-sjson *sjson_array_get(sjson *json, size_t i);
-bool sjson_array_set(sjson *json, char *key, sjson *value);
-sjson *sjson_object_get(sjson *json, char *key);
-bool sjson_object_set(sjson *json, char *key, sjson *value);
-//bool sjson_object_del(sjson *json, char *key);
-//bool sjson_array_del(sjson *json, char *key, sjson *value);
+sjson_result sjson_array_get(sjson *json, size_t i);
+sjson_resultnum sjson_array_set(sjson *json, char *key, sjson *value);
+sjson_result sjson_object_get(sjson *json, char *key);
+sjson_resultnum sjson_object_set(sjson *json, char *key, sjson *value);
+//sjson_resultnum sjson_object_del(sjson *json, char *key);
+//sjson_resultnum sjson_array_del(sjson *json, char *key, sjson *value);
 
-bool sjson_addchild(sjson *json, sjson *child);
-bool sjson_deletechild(sjson *json, sjson *child);
+sjson_resultnum sjson_addchild(sjson *json, sjson *child);
+sjson_resultnum sjson_deletechild(sjson *json, sjson *child);
 
 #define sjson_array_push sjson_addchild
 
@@ -224,7 +239,7 @@ void sjsonlexer_init(sjsonlexer *lexer, char *s, size_t len) {
     lexer->toks = sjsontokarr_new();
 }
 
-static bool sjsonlexer_lexnumber(sjsonlexer *lexer) {
+static sjson_resultnum sjsonlexer_lexnumber(sjsonlexer *lexer) {
     char *numberstart = lexer->c;
     bool didpoint = false, didsign = false;
     sjsonbuf buf;
@@ -234,12 +249,15 @@ static bool sjsonlexer_lexnumber(sjsonlexer *lexer) {
         char c = sjsonlexer_peek(lexer);
         if (!isdigit(c)) {
             if (c == '+' || c == '-') {
-                if (didsign)
+                if (didsign) {
                     goto bad;
+                }
                 didsign = true;
             }
             else if (c == '.') {
-                if (didpoint) goto bad;
+                if (didpoint) { 
+                    goto bad;
+                }
                 didpoint = true;
             }
             else {
@@ -255,20 +273,22 @@ static bool sjsonlexer_lexnumber(sjsonlexer *lexer) {
 
     sjsonlexer_pushtok(lexer, SJSON_TKNUMBERLITERAL, buf.buf, lexer->c);
 
-    return true;
+    return SJSON_SUCCESS;
 bad:
-    return false;
+    return SJSON_ERR_INVALID_SOURCE;
 }
 
-static bool sjsonlexer_lexstring(sjsonlexer *lexer) {
-    if (sjsonlexer_advance(lexer) != '\"')
-        return false; /* not string, cope */
+static sjson_resultnum sjsonlexer_lexstring(sjsonlexer *lexer) {
+    if (sjsonlexer_advance(lexer) != '\"') {
+        return SJSON_ERR_WRONG_TYPE;
+    }
     char *stringend = lexer->c;
 
     /* find terminating double quote, need to escape \" */
     while (stringend[0] != '\"') {
-        if (stringend > lexer->end)
-            goto bad;
+        if (stringend > lexer->end) {
+            return SJSON_ERR_NO_TERMINATING_DOUBLE_QUOTE;
+        }
         if (stringend[0] == '\\')
             stringend++;
         stringend++;
@@ -281,9 +301,10 @@ static bool sjsonlexer_lexstring(sjsonlexer *lexer) {
             && lexer->c < stringend) {
         char ch = sjsonlexer_advance(lexer);
         if (ch == '\\') {
-            int advance_ret = sjsonlexer_advance(lexer);
-            if (advance_ret == -1)
-                return false;
+            int advance_ret;
+            if ((advance_ret = sjsonlexer_advance(lexer)) == -1) {
+                return SJSON_ERR_NO_TERMINATING_DOUBLE_QUOTE;
+            }
             /* deal with escape character */
             switch (advance_ret) {
                 case '\\':
@@ -316,13 +337,11 @@ static bool sjsonlexer_lexstring(sjsonlexer *lexer) {
         }
     }
     sjsonlexer_pushtok(lexer, SJSON_TKSTRINGLITERAL, buf.buf, buf.buf + buf.len);
-    return true;
-bad:
-    return false;
+    return SJSON_SUCCESS;
 }
 
 
-bool sjsonlexer_lexprimitive(sjsonlexer *lexer) {
+sjson_resultnum sjsonlexer_lexprimitive(sjsonlexer *lexer) {
     int type;
     ptrdiff_t len;
     switch (sjsonlexer_peek(lexer)) {
@@ -339,20 +358,20 @@ bool sjsonlexer_lexprimitive(sjsonlexer *lexer) {
             len = 4;
             break;
         default:
-            goto bad;
+            return SJSON_ERR_WRONG_TYPE;
     }
-    if (lexer->end - lexer->start + 1 < len)
-        goto bad;
+    if (lexer->end - lexer->start + 1 < len) {
+        return SJSON_ERR_INVALID_SOURCE;
+    }
     sjsonlexer_pushtok(lexer, type, lexer->c, lexer->c + len - 1);
     lexer->c += len - 1;
 
-    return true;
-bad:
-    return false;
+    return SJSON_SUCCESS;
 }
 
-bool sjsonlexer_lex(sjsonlexer *lexer) {
+sjson_resultnum sjsonlexer_lex(sjsonlexer *lexer) {
     while (!sjsonlexer_isend(lexer)) {
+        int ret;
         switch (sjsonlexer_peek(lexer)) {
             case '[':
                 sjsonlexer_pushtok(lexer, SJSON_TKLSQUAREBRACKET, lexer->c, lexer->c);
@@ -384,18 +403,21 @@ bool sjsonlexer_lex(sjsonlexer *lexer) {
             case '9':
             case '+':
             case '-':
-                if (!sjsonlexer_lexnumber(lexer))
-                    goto bad;
+                if ((ret = sjsonlexer_lexnumber(lexer))) {
+                    return ret;
+                }
                 break;
             case '\"':
-                if (!sjsonlexer_lexstring(lexer))
-                    goto bad;
+                if ((ret = sjsonlexer_lexstring(lexer))) {
+                    return ret;
+                }
                 break;
             case 'n':
             case 't':
             case 'f':
-                if (!sjsonlexer_lexprimitive(lexer))
-                    goto bad;
+                if ((ret = sjsonlexer_lexprimitive(lexer))) {
+                    return ret;
+                }
                 break;
             case ' ':
             case '\t':
@@ -407,15 +429,18 @@ bool sjsonlexer_lex(sjsonlexer *lexer) {
         }
         sjsonlexer_advance(lexer);
     }
-    return true;
-bad:
-    return false;
+    return SJSON_SUCCESS;
 }
 
-sjson *sjson_new(int type) {
+sjson_result sjson_new(int type) {
     sjson *json = calloc(1, sizeof(*json));
+    if (json == NULL) {
+        return (sjson_result) {
+            .err = SJSON_ERR_NO_MEMORY,
+        };
+    }
     json->type = type;
-    return json;
+    return (sjson_result) { .json = json };
 }
 
 void sjson_free(sjson *json) {
@@ -428,71 +453,88 @@ void sjson_free(sjson *json) {
     free(json);
 }
 
-static sjson *sjson_parseobject(sjsontokarr *toks) {
-    sjson *obj = sjson_new(SJSON_OBJECT);
+static sjson_result sjson_parseobject(sjsontokarr *toks) {
+    sjson_result obj = sjson_new(SJSON_OBJECT);
+    if (obj.err) {
+        return (sjson_result) {
+            .err = obj.err
+        };
+    }
 
-    if (sjsontokarr_advance(toks).type != SJSON_TKLBRACE)
-        goto bad;
+    if (sjsontokarr_advance(toks).type != SJSON_TKLBRACE) {
+        return (sjson_result) {
+            .err = SJSON_ERR_INVALID_SOURCE
+        };
+    }
+
 
     while (sjsontokarr_peek(toks).type != SJSON_TKRBRACE) {
         char *key = sjsontokarr_advance(toks).start;
-        sjson *child;
-        if (sjsontokarr_advance(toks).type != SJSON_TKCOLON)
-            goto bad;
-        if ((child = sjson_parse(toks)) == NULL)
-            goto bad;
-        child->key = key;
-        if (!sjson_addchild(obj, child))
-            goto bad;
+        sjson_result child;
+        if (sjsontokarr_advance(toks).type != SJSON_TKCOLON) {
+            return (sjson_result) {
+                .err = SJSON_ERR_NO_TERMINATING_BRACE
+            };
+        }
+        child = sjson_parse(toks);
+        if (child.err) {
+            return child;
+        }
+        child.json->key = key;
+        int ret = sjson_addchild(obj.json, child.json);
+        if (ret != SJSON_SUCCESS) {
+            return (sjson_result) {
+                .err = ret
+            };
+        }
         sjsontok next = sjsontokarr_peek(toks);
         if (next.type == SJSON_TKCOMMA) {
-            if (sjsontokarr_advance(toks).type == SJSON_TKINVALID) {
-                logger("trailing comma");
-                break;
-            }
-            continue;
+            sjsontokarr_advance(toks);
         }
-        else if (next.type == SJSON_TKRBRACE) {
-            break;
-        }
-        else {
-            goto bad;
+        else if (next.type != SJSON_TKRBRACE) {
+            return (sjson_result) {
+                .err = SJSON_ERR_NO_TERMINATING_BRACE,
+            };
         }
     }
     return obj;
-bad:
-    return NULL;
 }
 
-static sjson *sjson_parsearray(sjsontokarr *toks) {
-    sjson *arr = sjson_new(SJSON_ARRAY);
+static sjson_result sjson_parsearray(sjsontokarr *toks) {
+    sjson_result arr = sjson_new(SJSON_ARRAY);
+    if (arr.err) {
+        return (sjson_result) {
+            .err = arr.err
+        };
+    }
     
-    if (sjsontokarr_advance(toks).type != SJSON_TKLSQUAREBRACKET)
-        goto bad;
+    if (sjsontokarr_advance(toks).type != SJSON_TKLSQUAREBRACKET) {
+        return (sjson_result) {
+            .err = SJSON_ERR_INVALID_SOURCE
+        };
+    }
 
     while (sjsontokarr_peek(toks).type != SJSON_TKRSQUAREBRACKET) {
-        sjson *child = sjson_parse(toks);
-        if (child == NULL) {
-            logger("error parsing array child");
+        sjson_result child = sjson_parse(toks);
+        if (child.err) {
+            return child;
         } else {
-            sjson_addchild(arr, child);
+            sjson_addchild(arr.json, child.json);
         }
         sjsontok next = sjsontokarr_peek(toks);
         if (next.type == SJSON_TKCOMMA) {
-            if (sjsontokarr_advance(toks).type == 0)
-                goto bad;
+            sjsontokarr_advance(toks);
         } else if (next.type != SJSON_TKRSQUAREBRACKET) {
-            logger("unknown token while parsing array %d", next.type);
-            goto bad;
+            return (sjson_result) {
+                .err = SJSON_ERR_NO_TERMINATING_BRACKET,
+            };
         }
     }
     return arr;
-bad:
-    return NULL;
 }
 
-sjson *sjson_parse(sjsontokarr *toks) {
-    sjson *ret = NULL;
+sjson_result sjson_parse(sjsontokarr *toks) {
+    sjson_result ret;
     switch (sjsontokarr_peek(toks).type) {
         case SJSON_TKTRUE:
             ret = sjson_new(SJSON_TRUE);
@@ -505,84 +547,104 @@ sjson *sjson_parse(sjsontokarr *toks) {
             break;
         case SJSON_TKLBRACE:
             ret = sjson_parseobject(toks);
+            if (ret.err) {
+                return ret;
+            }
             break;
         case SJSON_TKLSQUAREBRACKET:
             ret = sjson_parsearray(toks);
+            if (ret.err) {
+                return ret;
+            }
             break;
         case SJSON_TKNUMBERLITERAL:
             ret = sjson_new(SJSON_NUMBER);
-            ret->v.num = strtod(sjsontokarr_peek(toks).start, NULL);
+            if (ret.err) {
+                return ret;
+            }
+            ret.json->v.num = strtod(sjsontokarr_peek(toks).start, NULL);
             break;
         case SJSON_TKSTRINGLITERAL:
             ret = sjson_new(SJSON_STRING);
-            ret->v.str = sjsontokarr_peek(toks).start;
+            if (ret.err) {
+                return ret;
+            }
+            ret.json->v.str = sjsontokarr_peek(toks).start;
             break;
         default:
             logger("parse: unknown token %s %s", sjson_tokennames, sjsontokarr_peek(toks).type, sjsontokarr_peek(toks).start);
-            return NULL;
+            return (sjson_result) {
+                .err = SJSON_ERR_UNKNOWN_TOKEN,
+            };
     }
     sjsontokarr_advance(toks);
-    if (ret == NULL)
-        ret = sjson_new(SJSON_INVALID);
     return ret;
 }
 
-bool sjson_deletechild(sjson *json, sjson *child) {
-    if (json->v.child == NULL)
+sjson_resultnum sjson_deletechild(sjson *json, sjson *child) {
+    if (json->v.child == NULL) {
         return false;
+    }
     if (json->v.tail == child) {
-        if (json->v.child == child)
+        if (json->v.child == child) {
             json->v.tail = json->v.child = NULL;
-        else
+        }
+        else {
             json->v.tail = child->prev;
+        }
     } else if (json->v.child == child) {
         json->v.child = child->next;
     }
-    if (child->prev)
+    if (child->prev) {
         child->prev->next = child->next;
-    if (child->next)
+    }
+    if (child->next) {
         child->next->prev = child->prev;
-    return false;
+    }
+    return SJSON_SUCCESS;
 }
 
-sjson *sjson_object_get(sjson *json, char *key) {
-    if (json->type != SJSON_OBJECT)
-        goto bad;
-    sjson_foreach(json, iter)
-        if (!strcmp(iter->key, key))
-            return iter;
-bad:
-    return NULL;
+sjson_result sjson_object_get(sjson *json, char *key) {
+    if (json->type != SJSON_OBJECT) {
+        return (sjson_result) {
+            .err = SJSON_ERR_WRONG_TYPE
+        };
+    }
+    sjson_foreach(json, iter) {
+        if (!strcmp(iter->key, key)) {
+            return (sjson_result) {
+                .json = iter
+            };
+        }
+    }
+    return (sjson_result) {
+        .err = SJSON_ERR_NO_MATCHING_MEMBER,
+    };
 }
 
-bool sjson_object_del(sjson *json, char *key) {
-    if (json->type != SJSON_OBJECT)
-        goto bad;
+sjson_resultnum sjson_object_del(sjson *json, char *key) {
+    if (json->type != SJSON_OBJECT) {
+        return SJSON_ERR_WRONG_TYPE;
+    }
     sjson_foreach(json, iter)
         if (!strcmp(iter->key, key))
             sjson_deletechild(json, iter);
-    return true;
-bad:
-    return false;
+    return SJSON_SUCCESS;
 }
 
-bool sjson_object_set(sjson *json, char *key, sjson *value) {
-    if (json->type != SJSON_OBJECT)
-        goto bad;
+sjson_resultnum sjson_object_set(sjson *json, char *key, sjson *value) {
+    if (json->type != SJSON_OBJECT) {
+        return SJSON_ERR_WRONG_TYPE;
+    }
     sjson_object_del(json, key);
     value->key = key;
     sjson_addchild(json, value);
-    return true;
-bad:
-    return false;
+    return SJSON_SUCCESS;
 }
 
-bool sjson_addchild(sjson *json, sjson *child) {
-    if (child == NULL) {
-        goto bad;
-    }
+sjson_resultnum sjson_addchild(sjson *json, sjson *child) {
     if (json->type != SJSON_OBJECT && json->type != SJSON_ARRAY) {
-        goto bad;
+        return SJSON_ERR_WRONG_TYPE;
     }
     if (json->v.tail == NULL && json->v.child == NULL) {
         json->v.tail = json->v.child = child;
@@ -591,32 +653,42 @@ bool sjson_addchild(sjson *json, sjson *child) {
         child->prev = json->v.tail;
         json->v.tail = child;
     }
-    return true;
-bad:
-    logger("failed addchild");
-    return false;
+    return SJSON_SUCCESS;
 }
 
-sjson *sjson_array_get(sjson *json, size_t i) {
+sjson_result sjson_array_get(sjson *json, size_t i) {
     size_t x = 0;
-    sjson_foreach(json, iter)
-        if (x++ == i)
-            return iter;
-    return NULL;
+    sjson_foreach(json, iter) {
+        if (x++ == i) {
+            return (sjson_result) {
+                .json = iter
+            };
+        }
+    }
+    return (sjson_result) {
+        .err = SJSON_ERR_NO_MATCHING_MEMBER,
+    };
 }
 
-sjson *sjson_serialize(char *s, size_t len) {
+sjson_result sjson_serialize(const char *s, size_t len) {
     sjsonlexer lexer;
-    sjson *json;
+    sjson_result json;
     sjsonlexer_init(&lexer, s, len);
-    if (!sjsonlexer_lex(&lexer))
-        goto bad;
-    if ((json = sjson_parse(&lexer.toks)) == NULL)
-        goto bad;
+    sjson_resultnum lexres = sjsonlexer_lex(&lexer);
+    if (lexres != SJSON_SUCCESS) {
+        return (sjson_result) {
+            .err = lexres
+        };
+        //logger("lex failed %s\n", sjson_errnames[lexres]);
+    }
+    json = sjson_parse(&lexer.toks);
     free(lexer.toks.a);
+    if (json.err) {
+        return (sjson_result) {
+            .err = json.err
+        };
+    }
     return json;
-bad:
-    return NULL;
 }
 
 sjsonbuf sjson_deserialize(sjson *json) {
