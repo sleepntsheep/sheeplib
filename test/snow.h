@@ -67,6 +67,7 @@
 #include <setjmp.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <signal.h>
 
 #ifdef __MINGW32__
 # ifndef SNOW_USE_FNMATCH
