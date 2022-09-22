@@ -130,10 +130,10 @@ typedef struct sjsonparser {
 sjson_result sjson_new(int type);
 void sjson_free(sjson *json);
 
-sjson_result sjson_deserialize(const char *s, size_t len);
+sjson_result sjson_deserialize(char *s, size_t len);
 sjsonbuf sjson_serialize(sjson *json);
 
-void sjsonlexer_init(sjsonlexer *lexer, char *s, size_t len);
+static void sjsonlexer_init(sjsonlexer *lexer, char *s, size_t len);
 static sjson_resultnum sjsonlexer_lex(sjsonlexer *lexer);
 static sjson_result sjson_parse(sjsontokarr *toks);
 
@@ -232,7 +232,7 @@ static bool sjsonlexer_isend(sjsonlexer *lexer) {
     return lexer->c >= lexer->end;
 }
 
-void sjsonlexer_init(sjsonlexer *lexer, char *s, size_t len) {
+static void sjsonlexer_init(sjsonlexer *lexer, char *s, size_t len) {
     lexer->start = s,
     lexer->end = s + len,
     lexer->c = s,
@@ -670,7 +670,7 @@ sjson_result sjson_array_get(sjson *json, size_t i) {
     };
 }
 
-sjson_result sjson_deserialize(const char *s, size_t len) {
+sjson_result sjson_deserialize(char *s, size_t len) {
     sjsonlexer lexer;
     sjson_result json;
     sjsonlexer_init(&lexer, s, len);
