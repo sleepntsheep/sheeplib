@@ -453,6 +453,7 @@ describe(json) {
         }
     }
 
+    /*
     it("parse escape code \\u unicode") {
         char *strs[] = { "\"\\u3FA3\"", "\"\\u4712\"" };
         char *ans[] = { "\x3f\xa3", "\x47\x12" };
@@ -464,6 +465,7 @@ describe(json) {
             sjson_free(r.json);
         }
     }
+    */
 
     it("parse utf8") {
         char *strs[] = { "\"💀sdjoiad\"", "\"🥴🥴\"" };
