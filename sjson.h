@@ -16,8 +16,7 @@
  *
  * TODO
  *     - finish objectget arrayget objectset arrayset objectdel arraydel
- *     - (done? except unicode) fix escape character annoying problem 
- *         (both serializing and deserializing)
+ *     - unicode escape (deserializing)
  *
  */
 

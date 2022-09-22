@@ -465,6 +465,18 @@ describe(json) {
         }
     }
 
+    it("parse utf8") {
+        char *strs[] = { "\"💀sdjoiad\"", "\"🥴🥴\"" };
+        char *ans[] = { "💀sdjoiad", "🥴🥴" };
+        for (int i = 0; i < sizeof strs / sizeof *strs; i++) {
+            sjson_result r = sjson_deserialize(strs[i], strlen(strs[i]));
+            asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
+            asserteq_int(r.json->type, SJSON_STRING);
+            asserteq_str(r.json->v.str, ans[i]);
+            sjson_free(r.json);
+        }
+    }
+
     it("parse empty array") {
         sjson_result r = sjson_deserialize("[]", 2);
         asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");

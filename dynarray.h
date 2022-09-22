@@ -18,7 +18,7 @@
  * to avoid name collision
  *
  * If you want to use custom alloactor,
- * define malloc and realloc to them
+ * define DYNARRAY_MALLOC and DYNARRAY_REALLOC to them
  * before including dynarray.h
  *
  * How it works
@@ -99,6 +99,19 @@
 
 #ifndef SHEEP_DYNARRAY_H
 #define SHEEP_DYNARRAY_H
+
+#ifndef DYNARRAY_REALLOC
+#define DYNARRAY_REALLOC realloc
+#endif  /* DYNARRAY_REALLOC */
+
+#ifndef DYNARRAY_MALLOC
+#define DYNARRAY_MALLOC malloc
+#endif  /* DYNARRAY_MALLOC */
+
+#ifndef DYNARRAY_FREE
+#define DYNARRAY_FREE free
+#endif  /* DYNARRAY_FREE */
+
 
 #include <string.h>
 #include <stddef.h>
@@ -192,7 +205,7 @@ void dynarray_del(void* a, size_t idx) {
 
 void dynarray_free(void* a) {
     /* free dynamic array */
-    free(dynarray_info(a));
+    DYNARRAY_FREE(dynarray_info(a));
 }
 
 size_t dynarray_len(void* a) {
@@ -222,7 +235,7 @@ void* dynarray_setcap(void* a, size_t cap) {
     if (cap <= dynarray_cap(a))
         return a;
     void *b = ((dynarray_info_t*)
-            realloc(dynarray_info(a), sizeof(dynarray_info_t) +
+            DYNARRAY_REALLOC(dynarray_info(a), sizeof(dynarray_info_t) +
             cap * dynarray_membsize(a)))+1;
     dynarray_info(b)->capacity = cap;
     return b;
@@ -231,7 +244,7 @@ void* dynarray_setcap(void* a, size_t cap) {
 void* _dynarray_new(size_t membsize) {
     /* initialize a new dynarray */
     dynarray_info_t* a;
-    a = malloc(sizeof(dynarray_info_t) + membsize * DYNARRAY_MIN_CAPACITY);
+    a = DYNARRAY_MALLOC(sizeof(dynarray_info_t) + membsize * DYNARRAY_MIN_CAPACITY);
     a->length = 0;
     a->capacity = 4; //DYNARRAY_MIN_CAPACITY;
     a->membsize = membsize;
