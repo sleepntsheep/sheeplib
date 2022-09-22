@@ -3,6 +3,8 @@
 This repository is collection of my Single Header Library for C,
 None of these library depend on each other.
 
+These library support C99, but may not support C++.
+
 - log.h
     : nice interface for logging and debugging
     warn("Example warn %d", 105);
@@ -18,7 +20,7 @@ None of these library depend on each other.
 
 - xmalloc.h 
     : just normal x-wrapper function,
-    which might bec considered harmful by many
+    which might be considered harmful by many
 
 - str.h 
     : C-string is disaster, trying to fix that

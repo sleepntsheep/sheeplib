@@ -130,8 +130,8 @@ typedef struct sjsonparser {
 sjson_result sjson_new(int type);
 void sjson_free(sjson *json);
 
-sjson_result sjson_serialize(const char *s, size_t len);
-sjsonbuf sjson_deserialize(sjson *json);
+sjson_result sjson_deserialize(const char *s, size_t len);
+sjsonbuf sjson_serialize(sjson *json);
 
 void sjsonlexer_init(sjsonlexer *lexer, char *s, size_t len);
 static sjson_resultnum sjsonlexer_lex(sjsonlexer *lexer);
@@ -670,7 +670,7 @@ sjson_result sjson_array_get(sjson *json, size_t i) {
     };
 }
 
-sjson_result sjson_serialize(const char *s, size_t len) {
+sjson_result sjson_deserialize(const char *s, size_t len) {
     sjsonlexer lexer;
     sjson_result json;
     sjsonlexer_init(&lexer, s, len);
@@ -691,7 +691,7 @@ sjson_result sjson_serialize(const char *s, size_t len) {
     return json;
 }
 
-sjsonbuf sjson_deserialize(sjson *json) {
+sjsonbuf sjson_serialize(sjson *json) {
     sjsonbuf s;
     sjsonbuf_init(&s);
     switch (json->type) {
@@ -750,7 +750,7 @@ sjsonbuf sjson_deserialize(sjson *json) {
                 sjsonbuf_push(&s, it->key, strlen(it->key));
                 sjsonbuf_push(&s, "\"", 1);
                 sjsonbuf_push(&s, ":", 1);
-                sjsonbuf childbuf = sjson_deserialize(it);
+                sjsonbuf childbuf = sjson_serialize(it);
                 sjsonbuf_push(&s, childbuf.buf, childbuf.len);
                 free(childbuf.buf);
                 if (it->next != NULL)
@@ -761,7 +761,7 @@ sjsonbuf sjson_deserialize(sjson *json) {
         case SJSON_ARRAY:
             sjsonbuf_push(&s, "[", 1);
             sjson_foreach(json, it) {
-                sjsonbuf childbuf = sjson_deserialize(it);
+                sjsonbuf childbuf = sjson_serialize(it);
                 sjsonbuf_push(&s, childbuf.buf, childbuf.len);
                 free(childbuf.buf);
                 if (it->next != NULL)

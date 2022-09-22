@@ -353,19 +353,19 @@ describe(json) {
     sjson_register_logger(printf);
 
     it("parse null") {
-        sjson_result r = sjson_serialize("null", 4);
+        sjson_result r = sjson_deserialize("null", 4);
         asserteq_int(r.err, SJSON_SUCCESS);
         asserteq_int(r.json->type, SJSON_NULL);
     }
 
     it("parse true") {
-        sjson_result r = sjson_serialize("true", 4);
+        sjson_result r = sjson_deserialize("true", 4);
         asserteq_int(r.err, SJSON_SUCCESS);
         asserteq_int(r.json->type, SJSON_TRUE);
     }
 
     it("parse false") {
-        sjson_result r = sjson_serialize("false", 5);
+        sjson_result r = sjson_deserialize("false", 5);
         asserteq_int(r.err, SJSON_SUCCESS);
         asserteq_int(r.json->type, SJSON_FALSE);
     }
@@ -374,7 +374,7 @@ describe(json) {
         const char *nums[] = { "2", "3", "4", "5", "6", "10000" };
         const int ans[] = { 2, 3, 4, 5, 6, 10000 };
         for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
-            sjson_result r = sjson_serialize(nums[i], strlen(nums[i]));
+            sjson_result r = sjson_deserialize(nums[i], strlen(nums[i]));
             asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
             asserteq_int(r.json->type, SJSON_NUMBER);
             asserteq_dbl(r.json->v.num, ans[i]);
@@ -386,7 +386,7 @@ describe(json) {
         const char *nums[] = { "-2", "-3", "-4", "-5", "-6", "-10000" };
         const int ans[] = { -2, -3, -4, -5, -6, -10000 };
         for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
-            sjson_result r = sjson_serialize(nums[i], strlen(nums[i]));
+            sjson_result r = sjson_deserialize(nums[i], strlen(nums[i]));
             asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
             asserteq_int(r.json->type, SJSON_NUMBER);
             asserteq_dbl(r.json->v.num, ans[i]);
@@ -397,7 +397,7 @@ describe(json) {
     it("parse zero") {
         const char *nums[] = { "0", "00", "000", "0000", "00000" };
         for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
-            sjson_result r = sjson_serialize(nums[i], strlen(nums[i]));
+            sjson_result r = sjson_deserialize(nums[i], strlen(nums[i]));
             asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
             asserteq_int(r.json->type, SJSON_NUMBER);
             asserteq_dbl(r.json->v.num, 0);
@@ -409,7 +409,7 @@ describe(json) {
         const char *nums[] = { "2.213", "3.9203", "4.23", "5.738", "6.01", "10000.389" };
         const double ans[] = { 2.213, 3.9203, 4.23, 5.738, 6.01, 10000.389 };
         for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
-            sjson_result r = sjson_serialize(nums[i], strlen(nums[i]));
+            sjson_result r = sjson_deserialize(nums[i], strlen(nums[i]));
             asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
             asserteq_int(r.json->type, SJSON_NUMBER);
             asserteq_dbl(r.json->v.num, ans[i]);
@@ -421,7 +421,7 @@ describe(json) {
         const char *nums[] = { "-2.213", "-3.9203", "-4.23", "-5.738", "-6.01", "-10000.389" };
         const double ans[] = { -2.213, -3.9203, -4.23, -5.738, -6.01, -10000.389 };
         for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
-            sjson_result r = sjson_serialize(nums[i], strlen(nums[i]));
+            sjson_result r = sjson_deserialize(nums[i], strlen(nums[i]));
             asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
             asserteq_int(r.json->type, SJSON_NUMBER);
             asserteq_dbl(r.json->v.num, ans[i]);
@@ -433,7 +433,7 @@ describe(json) {
         char *strs[] = { "\"POOOG\"", "\"SHIEN\"", "\"WATER\"", "\"Kronii\"" };
         char *ans[] = { "POOOG", "SHIEN", "WATER", "Kronii" };
         for (int i = 0; i < sizeof strs / sizeof *strs; i++) {
-            sjson_result r = sjson_serialize(strs[i], strlen(strs[i]));
+            sjson_result r = sjson_deserialize(strs[i], strlen(strs[i]));
             asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
             asserteq_int(r.json->type, SJSON_STRING);
             asserteq_str(r.json->v.str, ans[i]);
@@ -445,7 +445,7 @@ describe(json) {
         char *strs[] = { "\"\\n\"", "\"\\r\"", "\"QE 2 is dedge\\t\"" };
         char *ans[] = { "\n", "\r", "QE 2 is dedge\t" };
         for (int i = 0; i < sizeof strs / sizeof *strs; i++) {
-            sjson_result r = sjson_serialize(strs[i], strlen(strs[i]));
+            sjson_result r = sjson_deserialize(strs[i], strlen(strs[i]));
             asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
             asserteq_int(r.json->type, SJSON_STRING);
             asserteq_str(r.json->v.str, ans[i]);
@@ -457,7 +457,7 @@ describe(json) {
         char *strs[] = { "\"\\u3FA3\"", "\"\\u4712\"" };
         char *ans[] = { "\x3f\xa3", "\x47\x12" };
         for (int i = 0; i < sizeof strs / sizeof *strs; i++) {
-            sjson_result r = sjson_serialize(strs[i], strlen(strs[i]));
+            sjson_result r = sjson_deserialize(strs[i], strlen(strs[i]));
             asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
             asserteq_int(r.json->type, SJSON_STRING);
             asserteq_str(r.json->v.str, ans[i]);
@@ -466,14 +466,14 @@ describe(json) {
     }
 
     it("parse empty array") {
-        sjson_result r = sjson_serialize("[]", 2);
+        sjson_result r = sjson_deserialize("[]", 2);
         asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
         asserteq_int(r.json->type, SJSON_ARRAY);
         assert(!r.json->v.child);
     }
 
     it("parse non empty array") {
-        sjson_result r = sjson_serialize("[\"a\",\"b\"]", 9);
+        sjson_result r = sjson_deserialize("[\"a\",\"b\"]", 9);
         asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
         asserteq_int(r.json->type, SJSON_ARRAY);
         assert(r.json->v.child);
@@ -482,7 +482,7 @@ describe(json) {
     }
 
     it("parse nested array") {
-        sjson_result r = sjson_serialize("[[[]]]]", 6);
+        sjson_result r = sjson_deserialize("[[[]]]]", 6);
         asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
         asserteq_int(r.json->type, SJSON_ARRAY);
         asserteq_int(r.json->type, SJSON_ARRAY);
@@ -494,7 +494,7 @@ describe(json) {
 
     it("parse int array") {
         char *s = "[1,2,3,4,5,6,7,8]";
-        sjson_result r = sjson_serialize(s, strlen(s));
+        sjson_result r = sjson_deserialize(s, strlen(s));
         asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
         asserteq_int(r.json->type, SJSON_ARRAY);
         assert(r.json->v.child);
@@ -513,7 +513,7 @@ describe(json) {
 
     it("parse mixed array") {
         char *s = "[1, \"EEEE\"]";
-        sjson_result r = sjson_serialize(s, strlen(s));
+        sjson_result r = sjson_deserialize(s, strlen(s));
         asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
         assert(r.json->v.child);
         assert(r.json->v.tail);
@@ -523,7 +523,7 @@ describe(json) {
     }
 
     it("parse empty object") {
-        sjson_result r = sjson_serialize("{}", 2);
+        sjson_result r = sjson_deserialize("{}", 2);
         asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
         asserteq_int(r.json->type, SJSON_OBJECT);
         asserteq_ptr(r.json->v.child, 0);
@@ -532,7 +532,7 @@ describe(json) {
     it("parse non empty object") {
         char *j;
         j = "{ \"key\": \"value\", \"num\": -2839.489 }";
-        sjson_result r = sjson_serialize(j, strlen(j));
+        sjson_result r = sjson_deserialize(j, strlen(j));
         asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
         asserteq_int(r.json->type, SJSON_OBJECT);
         assertneq_ptr(r.json->v.child, NULL);
@@ -545,7 +545,7 @@ describe(json) {
     it("parse nested object") {
         char *j;
         j = "{ \"key\": \"value\", \"nest\": {} } ";
-        sjson_result r = sjson_serialize(j, strlen(j));
+        sjson_result r = sjson_deserialize(j, strlen(j));
         asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
         asserteq_int(r.json->type, SJSON_OBJECT);
         assertneq_ptr(r.json->v.child, NULL);
