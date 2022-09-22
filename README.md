@@ -30,10 +30,7 @@ These library support C99, but may not support C++.
 
 # installation:
 
-You can either use sheeplib as single header library or shared Library
-
-To use as single header library, simply copy
-header.h to your project tree.
+simply copy header.h to your project tree.
 
 # usage:
 
