@@ -1,12 +1,6 @@
-/* algo.h
+/* @file algo.h
+ * @brief Basic Algorithms
  *
- * SALGO_DECL(type, threewaycomparefunction)
- *   - generate all type-safe algorithm functions 
- *     for "type" type.
- *     threewaycomparefunction is a function
- *     taking type "type" parameters - a, b 
- *     which return negative number if a < b 
- *     zero if a == b and positive number if a > b
  *
  * ssort_type(*base, nmemb) 
  *   - sorting algo
@@ -41,11 +35,31 @@
 #include <stdlib.h>
 #include <string.h>
 
+/**
+ * @brief generate all type-safe algorithm functions 
+ * @param type type of elements
+ * @cmpfnc three-way comparison function, returning negative if a < b, 0 if a == b, positive if a > b
+ */
 #define SALGO_DECL(type,cmpfnc)\
+    /** \
+     * @brief unstable sort array \
+     */ \
     void ssort__##type(type *base, size_t nmemb);\
+    /** \
+     * @brief binary search and return pointer to element if exists, NULL otherwise \
+     */ \
     type *sbsearch_##type(type key, type *base, size_t nmemb);\
+    /** \
+     * @brief binary search for first element greater than key and return pointer to element if exists, NULL otherwise \
+     */ \
     type *supperbound_##type(type key, type *base, size_t nmemb);\
+    /** \
+     * @brief binary search for first element not greater than key and return pointer to element if exists, NULL otherwise \
+     */ \
     type *slowerbound_##type(type key, type *base, size_t nmemb);\
+    /** \
+     * @brief linear search and return pointer to element if exists, NULL otherwise \
+     */ \
     type *slsearch_##type(type key, type *base, size_t nmemb);\
 \
     void ssort_merge_##type(type *base, size_t left,\

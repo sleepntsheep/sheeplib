@@ -1,9 +1,6 @@
-/* fenwick.h - generic type fenwick tree in C
- * usage: FENWICK_DECL(type)
- *
- * note: parameter a in fenwick_type_new **must**
- * be one-indexed-array, not zero-indexed-array
- *
+/**
+ * @file fenwick.h
+ * @brief generic type fenwick tree in C
  * sleepntsheep 2022
  */
 #pragma once
@@ -11,6 +8,12 @@
 #define SHEEP_FENWICK_H
 #include <stdlib.h>
 
+/**
+ * @brief declare function and type for fenwick tree
+ * @param type type of data
+ * @param zero zero value of type
+ * @param updatefnc function to update data (sum, xor, multiply)
+ */
 #define FENWICK_DECL(type, zero, updatefnc) \
     typedef struct { \
         type *a; \
