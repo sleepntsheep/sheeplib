@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['sjson_5farray_5fpush_0',['sjson_array_push',['../sjson_8h.html#a79fbfcf13744019da44d100020ae99e4',1,'sjson.h']]],
-  ['sjson_5fforeach_1',['sjson_foreach',['../sjson_8h.html#a5fccaab023b136a378e33463cae4e082',1,'sjson.h']]]
+  ['panic_108',['panic',['../log_8h.html#a1445e207e36c97ff84c54b47288cea19',1,'log.h']]],
+  ['panicerr_109',['panicerr',['../log_8h.html#a50814ad58e0c48a7dee787060dc28035',1,'log.h']]]
 ];

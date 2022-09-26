@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['panic_0',['panic',['../log_8h.html#a1445e207e36c97ff84c54b47288cea19',1,'log.h']]],
-  ['panicerr_1',['panicerr',['../log_8h.html#a50814ad58e0c48a7dee787060dc28035',1,'log.h']]],
-  ['prev_2',['prev',['../structsjson.html#a2bdc8349e7639095ad2bc0f5477cd65d',1,'sjson']]]
+  ['next_24',['next',['../structsjson.html#a069aed305a522cba68fc5a5bf1dba84d',1,'sjson']]]
 ];

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.17"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>sheeplib: sjsonbuf Struct Reference</title>
+<title>sheeplib: fenwick.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -63,63 +63,74 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#pub-attribs">Data Fields</a>  </div>
+<a href="#define-members">Macros</a>  </div>
   <div class="headertitle">
-<div class="title">sjsonbuf Struct Reference</div>  </div>
+<div class="title">fenwick.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>char buffer  
- <a href="structsjsonbuf.html#details">More...</a></p>
-
-<p><code>#include &lt;<a class="el" href="sjson_8h_source.html">sjson.h</a>&gt;</code></p>
+<p>generic type fenwick tree in C sleepntsheep 2022  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &lt;stdlib.h&gt;</code><br />
+</div>
+<p><a href="fenwick_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
-Data Fields</h2></td></tr>
-<tr class="memitem:aea4531a74da9716d4650577ec1c3ab02"><td class="memItemLeft" align="right" valign="top"><a id="aea4531a74da9716d4650577ec1c3ab02"></a>
-size_t&#160;</td><td class="memItemRight" valign="bottom"><b>len</b></td></tr>
-<tr class="separator:aea4531a74da9716d4650577ec1c3ab02"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a23335500fe1e92f51456195539f8d788"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsjsonbuf.html#a23335500fe1e92f51456195539f8d788">cap</a></td></tr>
-<tr class="separator:a23335500fe1e92f51456195539f8d788"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2fb48c8edb2a0b14c090d67d12979e71"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structsjsonbuf.html#a2fb48c8edb2a0b14c090d67d12979e71">buf</a></td></tr>
-<tr class="separator:a2fb48c8edb2a0b14c090d67d12979e71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:ac1cde3be77ae0c59d37929e9c20d06a4"><td class="memItemLeft" align="right" valign="top"><a id="ac1cde3be77ae0c59d37929e9c20d06a4"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>SHEEP_FENWICK_H</b></td></tr>
+<tr class="separator:ac1cde3be77ae0c59d37929e9c20d06a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad2d49c364a137006167c011759d58d57"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fenwick_8h.html#ad2d49c364a137006167c011759d58d57">FENWICK_DECL</a>(type,  zero,  updatefnc)</td></tr>
+<tr class="memdesc:ad2d49c364a137006167c011759d58d57"><td class="mdescLeft">&#160;</td><td class="mdescRight">declare function and type for fenwick tree  <a href="fenwick_8h.html#ad2d49c364a137006167c011759d58d57">More...</a><br /></td></tr>
+<tr class="separator:ad2d49c364a137006167c011759d58d57"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>char buffer </p>
-</div><h2 class="groupheader">Field Documentation</h2>
-<a id="a2fb48c8edb2a0b14c090d67d12979e71"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2fb48c8edb2a0b14c090d67d12979e71">&#9670;&nbsp;</a></span>buf</h2>
+<div class="textblock"><p>generic type fenwick tree in C sleepntsheep 2022 </p>
+</div><h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="ad2d49c364a137006167c011759d58d57"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad2d49c364a137006167c011759d58d57">&#9670;&nbsp;</a></span>FENWICK_DECL</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">char* sjsonbuf::buf</td>
+          <td class="memname">#define FENWICK_DECL</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">type, </td>
         </tr>
-      </table>
-</div><div class="memdoc">
-<p>private: capacity </p>
-
-</div>
-</div>
-<a id="a23335500fe1e92f51456195539f8d788"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a23335500fe1e92f51456195539f8d788">&#9670;&nbsp;</a></span>cap</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
         <tr>
-          <td class="memname">size_t sjsonbuf::cap</td>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">zero, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">updatefnc&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>length </p>
+
+<p>declare function and type for fenwick tree </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">type</td><td>type of data </td></tr>
+    <tr><td class="paramname">zero</td><td>zero value of type </td></tr>
+    <tr><td class="paramname">updatefnc</td><td>function to update data (sum, xor, multiply) </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
-<hr/>The documentation for this struct was generated from the following file:<ul>
-<li><a class="el" href="sjson_8h_source.html">sjson.h</a></li>
-</ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

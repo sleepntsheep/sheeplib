@@ -1,28 +1,6 @@
 var searchData=
 [
-  ['sheeplib_0',['sheeplib',['../md_README.html',1,'']]],
-  ['sjson_1',['sjson',['../structsjson.html',1,'']]],
-  ['sjson_2eh_2',['sjson.h',['../sjson_8h.html',1,'']]],
-  ['sjson_5faddchild_3',['sjson_addchild',['../sjson_8h.html#a5281fdf50546b94672c29e74aef16f26',1,'sjson.h']]],
-  ['sjson_5farray_5fget_4',['sjson_array_get',['../sjson_8h.html#ad0a49f6f951fdf7f30cd4579257c5f2e',1,'sjson.h']]],
-  ['sjson_5farray_5fpush_5',['sjson_array_push',['../sjson_8h.html#a79fbfcf13744019da44d100020ae99e4',1,'sjson.h']]],
-  ['sjson_5farray_5fset_6',['sjson_array_set',['../sjson_8h.html#a6294632833b44e7453e63f6cfbe8d78e',1,'sjson.h']]],
-  ['sjson_5fdeletechild_7',['sjson_deletechild',['../sjson_8h.html#a7083bc3e1792c25340cc8033a24a16d4',1,'sjson.h']]],
-  ['sjson_5fdeserialize_8',['sjson_deserialize',['../sjson_8h.html#abf17cac328d59a1fb09cfa561690e12a',1,'sjson.h']]],
-  ['sjson_5fforeach_9',['sjson_foreach',['../sjson_8h.html#a5fccaab023b136a378e33463cae4e082',1,'sjson.h']]],
-  ['sjson_5ffree_10',['sjson_free',['../sjson_8h.html#a774f5b7b04cbb9085248f062f7eb3700',1,'sjson.h']]],
-  ['sjson_5fnew_11',['sjson_new',['../sjson_8h.html#a2f7dbe4a25fffbbae42c416740b19163',1,'sjson.h']]],
-  ['sjson_5fobject_5fget_12',['sjson_object_get',['../sjson_8h.html#ac99f180109b60755fbda0230b163ee16',1,'sjson.h']]],
-  ['sjson_5fobject_5fset_13',['sjson_object_set',['../sjson_8h.html#a40e4bd650b600eb922be2bba01478bc3',1,'sjson.h']]],
-  ['sjson_5fregister_5flogger_14',['sjson_register_logger',['../sjson_8h.html#afdac7ea7fbe05563eb661ff91103b303',1,'sjson.h']]],
-  ['sjson_5fresult_15',['sjson_result',['../structsjson__result.html',1,'']]],
-  ['sjson_5fserialize_16',['sjson_serialize',['../sjson_8h.html#a91b93a3fde07d07660caacde36460d3c',1,'sjson.h']]],
-  ['sjsonbuf_17',['sjsonbuf',['../structsjsonbuf.html',1,'']]],
-  ['sjsonlexer_18',['sjsonlexer',['../structsjsonlexer.html',1,'']]],
-  ['sjsonparser_19',['sjsonparser',['../structsjsonparser.html',1,'']]],
-  ['sjsontok_20',['sjsontok',['../structsjsontok.html',1,'']]],
-  ['sjsontokarr_21',['sjsontokarr',['../structsjsontokarr.html',1,'']]],
-  ['slist_22',['slist',['../structslist.html',1,'']]],
-  ['str_23',['str',['../structsjson.html#ac0811a118b2d34707d9e2893bcdf3eaa',1,'sjson::str()'],['../structstr.html',1,'str']]],
-  ['strarray_24',['strarray',['../structstrarray.html',1,'']]]
+  ['panic_25',['panic',['../log_8h.html#a1445e207e36c97ff84c54b47288cea19',1,'log.h']]],
+  ['panicerr_26',['panicerr',['../log_8h.html#a50814ad58e0c48a7dee787060dc28035',1,'log.h']]],
+  ['prev_27',['prev',['../structsjson.html#a2bdc8349e7639095ad2bc0f5477cd65d',1,'sjson']]]
 ];

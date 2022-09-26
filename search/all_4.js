@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['info_0',['info',['../log_8h.html#a6576e6f80131b01ef1bca232282ef26b',1,'log.h']]],
-  ['infoerr_1',['infoerr',['../log_8h.html#ae0bd46481b404d5364006133b59287eb',1,'log.h']]]
+  ['fenwick_2eh_18',['fenwick.h',['../fenwick_8h.html',1,'']]],
+  ['fenwick_5fdecl_19',['FENWICK_DECL',['../fenwick_8h.html#ad2d49c364a137006167c011759d58d57',1,'fenwick.h']]]
 ];

@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['key_0',['key',['../structsjson.html#a1607f112ea8d50e368680678fe407abf',1,'sjson']]]
+  ['info_20',['info',['../log_8h.html#a6576e6f80131b01ef1bca232282ef26b',1,'log.h']]],
+  ['infoerr_21',['infoerr',['../log_8h.html#ae0bd46481b404d5364006133b59287eb',1,'log.h']]]
 ];
