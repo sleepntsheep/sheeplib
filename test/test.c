@@ -12,6 +12,7 @@
 #include "../sjson.h"
 #define SHEEP_LOG_IMPLEMENTATION
 #include "../log.h"
+#include "../fenwick.h"
 #define SNOW_ENABLED
 #include "snow.h"
 
@@ -19,6 +20,10 @@
  * TODO 
  *     add more complicated nested sjson.h test cases 
  */
+
+uint64_t intadd(uint64_t a, uint64_t b) {
+    return a+b;
+}
 
 int *rndarr(int size) {
     int i;
@@ -561,6 +566,23 @@ describe(json) {
 describe(log) {
     it("warn") {
         warn("warn");
+    }
+}
+
+FENWICK_DECL(uint64_t, 0, intadd)
+
+describe(fenwick) {
+    it("addint") {
+        int n = 1000000;
+        uint64_t *a = calloc(n+2, sizeof *a);
+        uint64_t x;
+        for (int i = 1; i <= n; i++) a[i] = i;
+        fenwick_uint64_t_t f = fenwick_uint64_t_new(a, n);
+        for (uint64_t i = 1; i <= n; i++) {
+            uint64_t oti = fenwick_uint64_t_query(f, i);
+            asserteq_int(i * (i+1) / 2, oti);
+            x += oti;
+        }
     }
 }
 
