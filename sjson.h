@@ -1,12 +1,11 @@
-/* sjson.h - json parser 
+/**
+ * @file sjson.h
+ * @brief Simple json parser
+ */
+/* sjson.h v0.0.2
+ * - json parser 
  * sleepntsheep 2022 
  *
- * Usage - 
- *      not existing documentation
- *
- *  sjson type store everything, 
- *
-
  * next and prev is used for doubly linked list in object and array
  * no hashmap is used here, doubly linked list is more simple, despite being O(n) lookup
  * childvalue store the doubly linked list of all child, if type is object or array
@@ -75,24 +74,26 @@ static const char *sjson_tokennames[] = { SJSON_TOKENS_LIST };
 
 typedef enum sjson_resultnum sjson_resultnum;
 
+/**
+ * @brief char buffer
+ */
 typedef struct sjsonbuf {
-	size_t len, cap;
-	char *buf;
+	size_t len; /** length */
+    size_t cap; /** private: capacity */
+	char *buf; /** buffer */
 } sjsonbuf;
 
 typedef struct sjson {
-    int type;
+    int type; /** type of sjson object */
 	struct {
-		double num;
-		const char *str;
-		struct sjson *child;
-		struct sjson *tail;
-	} v;
-	/* for array & object child */
-    struct sjson *next;
-    struct sjson *prev;
-	/* for object child */
-    const char *key;
+		double num; /** number value */
+		const char *str; /** string value */
+		struct sjson *child; /** child value */
+		struct sjson *tail; /** last node in children linked list */
+	} v; /** value of object */
+    struct sjson *next; /** next sibling object */
+    struct sjson *prev; /** previous sibling object */
+    const char *key; /** key of object, if any */
 } sjson;
 
 typedef struct {
@@ -122,31 +123,74 @@ typedef struct sjsonparser {
     sjsontokarr toks;
 } sjsonparser;
 
+/**
+ * @brief iterate through all child of sjson object
+ */
 #define sjson_foreach(json, iter) \
     for (sjson *iter = (json)->v.child; (iter) != NULL; iter = (iter)->next) 
 
+/**
+ * @brief create new sjson object with type
+ */
 sjson_result sjson_new(int type);
+
+/**
+ * @brief recursively free all children of json
+ * and then free json
+ */
 void sjson_free(sjson *json);
 
+/**
+ * @brief parse C-string to sjson *
+ */
 sjson_result sjson_deserialize(const char *s, size_t len);
+
+/**
+ * @brief serialize sjson * to C-string in sjsonbuf
+ */
 sjsonbuf sjson_serialize(sjson *json);
 
 static void sjsonlexer_init(sjsonlexer *lexer, const char *s, size_t len);
 static sjson_resultnum sjsonlexer_lex(sjsonlexer *lexer);
 static sjson_result sjson_parse(sjsontokarr *toks);
 
+/**
+ * @brief get child by index
+ */
 sjson_result sjson_array_get(sjson *json, size_t i);
-sjson_resultnum sjson_array_set(sjson *json, char *key, sjson *value);
+/**
+ * @brief set index-th child of array to json
+ */
+sjson_resultnum sjson_array_set(sjson *json, size_t i);
+/**
+ * @brief get key property of object
+ */
 sjson_result sjson_object_get(sjson *json, char *key);
+/**
+ * @brief set key property of object to json
+ */
 sjson_resultnum sjson_object_set(sjson *json, char *key, sjson *value);
 //sjson_resultnum sjson_object_del(sjson *json, char *key);
 //sjson_resultnum sjson_array_del(sjson *json, char *key, sjson *value);
 
+/**
+ * @brief add child to json's children
+ */
 sjson_resultnum sjson_addchild(sjson *json, sjson *child);
+
+/**
+ * @brief delete child from json's children
+ */
 sjson_resultnum sjson_deletechild(sjson *json, sjson *child);
 
+/**
+ * @brief add element to end of array
+ */
 #define sjson_array_push sjson_addchild
 
+/**
+ * @brief register logger function to sjson
+ */
 void sjson_register_logger(int (*logger)(const char*, ...));
 
 static int sjson_logger_dummy(const char *fmt, ...) {
@@ -166,8 +210,6 @@ static int (*logger)(const char*, ...) = sjson_logger_dummy;
 #include <stdlib.h>
 #include <stdio.h>
 
-#define SJSON_LOG(errnum) puts(#errnum) //logger("%s\n", sjson_errnames[errnum])
-                                        
 static sjsontokarr sjsontokarr_new() {
     return (sjsontokarr) {
         .length = 0,

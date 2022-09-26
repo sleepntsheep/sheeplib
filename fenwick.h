@@ -42,7 +42,7 @@
     type fenwick_##type##_query(fenwick_##type##_t t, long i) { \
         type range = zero; \
         while (i > 0) { \
-            range = updatefnc(t.a[i], sum); \
+            range = updatefnc(t.a[i], range); \
             i -= i & -i; \
         } \
         return range; \
