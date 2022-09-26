@@ -18,40 +18,33 @@
 #include <string.h>
 
 #define __FL__ __FILE__, __LINE__
-#define panic(...) _panic(__FL__, __VA_ARGS__)
-#define panicerr(...) _panicerr(__FL__, __VA_ARGS__)
-#define warn(...) _warn(__FL__, __VA_ARGS__)
-#define warnerr(...) _warnerr(__FL__, __VA_ARGS__)
-#define info(...) _info(__FL__, __VA_ARGS__)
-#define infoerr(...) _infoerr(__FL__, __VA_ARGS__)
+#define panic(...) do {  \
+                        __stderr_log("PANIC", __FL__, __VA_ARGS__);     \
+                        exit(1);                \
+                    } while (0)
+#define panicerr(...) do {  \
+                        __stderr_log("PANIC", __FL__, __VA_ARGS__);     \
+                        perror("");             \
+                        exit(1);                \
+                    } while (0)
+#define warn(...) do {  \
+                        __stderr_log("WARN", __FL__, __VA_ARGS__);     \
+                    } while (0)
+#define warnerr(...) do {  \
+                        __stderr_log("WARN", __FL__, __VA_ARGS__);     \
+                        perror("");             \
+                    } while (0)
+#define info(...) do {  \
+                        __stderr_log("INFO", __FL__, __VA_ARGS__);     \
+                    } while (0)
+#define infoerr(...) do {  \
+                        __stderr_log("INFO", __FL__, __VA_ARGS__);     \
+                        perror("");             \
+                    } while (0)
 
 void
 __stderr_log(const char *type, const char *file,
         const int line, const char *fmt, ...);
-
-void
-_panic(const char *file, const int line,
-        const char *fmt, ...);
-
-void
-_panicerr(const char *file, const int line,
-        const char *fmt, ...);
-
-void
-_warn(const char *file, const int line,
-        const char *fmt, ...);
-
-void
-_warnerr(const char *file, const int line,
-        const char *fmt, ...);
-
-void
-_info(const char *file, const int line,
-        const char *fmt, ...);
-
-void
-_infoerr(const char *file, const int line,
-        const char *fmt, ...);
 
 #endif /* SHEEP_LOG_H */
 
@@ -79,52 +72,6 @@ __stderr_log(const char *type, const char *file
     fflush(stderr);
 }
 
-void
-_panic(const char *file, const int line,
-        const char *fmt, ...)
-{
-    _sheep_va(__stderr_log("panic", file, line, fmt, a));
-    exit(EXIT_FAILURE);
-}
-
-void
-_panicerr(const char *file, const int line,
-        const char *fmt, ...)
-{
-    _sheep_va(__stderr_log("panic", file, line, fmt, a));
-    perror("");
-    exit(EXIT_FAILURE);
-}
-
-void
-_warn(const char *file, const int line,
-        const char *fmt, ...)
-{
-    _sheep_va(__stderr_log("warn", file, line, fmt, a));
-}
-
-void
-_warnerr(const char *file, const int line,
-        const char *fmt, ...)
-{
-    _sheep_va(__stderr_log("warn", file, line, fmt, a));
-    perror("");
-}
-
-void
-_info(const char *file, const int line,
-        const char *fmt, ...)
-{
-    _sheep_va(__stderr_log("info", file, line, fmt, a));
-}
-
-void
-_infoerr(const char *file, const int line,
-        const char *fmt, ...)
-{
-    _sheep_va(__stderr_log("info", file, line, fmt, a));
-    perror("");
-}
 
 #endif /* SHEEP_LOG_IMPLEMENTATION */
 

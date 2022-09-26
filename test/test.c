@@ -22,7 +22,7 @@
 
 int *rndarr(int size) {
     int i;
-    int *a = arrnew(int);
+    int *a = arrnew;
     for (i = 0; i < arrlen(a); i++)
          arrpop(a);
     for (i = 0; i < size; i++) {
@@ -39,21 +39,15 @@ int cmpm(int a, int b) {
 SALGO_DECL(int,cmpm)
 
 describe(dynarray) {
-    it("new array") {
-        int *a = arrnew(int);
-        assert(a);
-    }
-
     it("array len") {
-        int *a = arrnew(int);
-        asserteq_int(arrlen(a), 0);
+        int *a = arrnew;
         arrpush(a, 5);
         arrpush(a, 5);
         asserteq_int(arrlen(a), 2);
     }
 
     it("arrcap_test") {
-        int *a = arrnew(int);
+        int *a = arrnew;
         asserteq_int(arrcap(a), 4);
         arrpush(a, 5);
         arrpush(a, 5);
@@ -66,7 +60,7 @@ describe(dynarray) {
     }
 
     it("array push") {
-        int *a = arrnew(int), i;
+        int *a = arrnew, i;
         for (i = 0; i < 10; i++)
         {
             arrpush(a, i);
@@ -75,7 +69,7 @@ describe(dynarray) {
     }
 
     it("array del") {
-        int *a = arrnew(int), i;
+        int *a = arrnew, i;
         for (i = 0; i < 5; i++)
             arrpush(a, i);
         arrdel(a, 2);
@@ -84,7 +78,7 @@ describe(dynarray) {
     }
 
     it("array ins") {
-        int *a = arrnew(int);
+        int *a = arrnew;
         int i, n;
         for (i = 0; i < 5; i++)
             if (i != 2)
@@ -95,7 +89,7 @@ describe(dynarray) {
         asserteq_int(a[2], 2);
         asserteq_int(a[3], 3);
         arrfree(a);
-        a = arrnew(int);
+        a = arrnew;
         for (i = 0; i < 5; i++)
             arrpush(a, i);
         asserteq_int(a[3], 3);
@@ -113,7 +107,7 @@ describe(dynarray) {
     }
 
     it("arrsetlen_test") {
-        int *a = arrnew(int), i;
+        int *a = arrnew, i;
         for (i = 0; i < 1000; i++)
             arrpush(a, i);
         asserteq_int(arrlen(a), 1000);
@@ -128,38 +122,31 @@ describe(dynarray) {
     it("arrpop_test") {
         struct sa {int a, b;};
         struct sa ee, temp, *sa;
-        int *a = arrnew(int);
+        int *a = arrnew;
+        assert(sizeof(sa) == sizeof(int)*2);
         arrpush(a, 1);
         arrpush(a, 1);
         arrpush(a, 1);
         arrpush(a, 2);
         arrpush(a, -1);
-        assert(arrpop(a) == -1);
+        asserteq_int(arrpop(a), -1);
         asserteq_int(arrpop(a), 2);
         asserteq_int(arrpop(a), 1);
         asserteq_int(arrpop(a), 1);
         asserteq_int(arrpop(a), 1);
-        asserteq_int(arrpop(a), 0);
-        sa = arrnew(struct sa);
+        sa = arrnew;
         temp.a = 1; temp.b = 5;
         ee.a = 1; temp.b = 5;
-        arrpush(sa, temp);
+
+        (sa) = dynarray_ensure_empty((sa), 1); 
+        (sa)[dynarray_len(sa)] = (temp); 
+        dynarray_info(sa)->length++; 
         arrpush(sa, ee);
         asserteq_int(arrpop(sa).a, 1);
         asserteq_int(arrpop(sa).b, 5);
         arrfree(a);
     }
 
-    it("arrmembsize_test") {
-        void *a = arrnew(int);
-        assert(dynarray_membsize(a) == sizeof(int));
-        a = arrnew(long);
-        assert(dynarray_membsize(a) == sizeof(long));
-        arrfree(a);
-        a = arrnew(char);
-        assert(dynarray_membsize(a) == sizeof(char));
-        arrfree(a);
-    }
 }
 
 describe(str) {
@@ -317,7 +304,7 @@ describe(algo) {
     }
     arrfree(a);
 
-    a = arrnew(int);
+    a = arrnew;
     for (int i = 0; i < n; i++)
         arrpush(a, i);
     it("sbsearch") {
