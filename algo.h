@@ -18,12 +18,12 @@
  *   - linear search, base doesn't need to be sorted
  *
  * supperbound_type(key, *base, nmemb)
- *  - std::upperbound like function, search for first element in array
- *    that is greater than key
+ *   - std::upperbound like function, search for first element in array
+ *     that is greater than key
  *
  * slowerbound_type(key, *base, nmemb)
- *  - std::lowerbound like function, search for first element in array
- *    that is greater or equal to key
+ *   - std::lowerbound like function, search for first element in array
+ *     that is lesser or equal to key
  * 
  * Notes: 
  *    ssort must be O(nlogn) average.
@@ -32,12 +32,14 @@
  * sleepntsheep 2022
  */
 
+#pragma once
+
+#ifndef SHEEP_ALGO_H
+#define SHEEP_ALGO_H
 
 #include <stddef.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
-
 
 #define SALGO_DECL(type,cmpfnc)\
     void ssort__##type(type *base, size_t nmemb);\
@@ -160,3 +162,5 @@
                 return base + i;\
         return NULL;\
     }
+
+#endif /* SHEEP_ALGO_H */

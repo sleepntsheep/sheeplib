@@ -6,6 +6,7 @@
  *
  * sleepntsheep 2022
  */
+#pragma once
 #ifndef SHEEP_FENWICK_H
 #define SHEEP_FENWICK_H
 #include <stdlib.h>
@@ -46,6 +47,5 @@
         } \
         return range; \
     }
-
 
 #endif /* SHEEP_FENWICK_H */

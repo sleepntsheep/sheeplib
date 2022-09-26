@@ -12,9 +12,8 @@
  *      T* arr = dynarray_new(T);
  *      dynarray_push(arr, X);
  *
- * If you want to use long 
- * dynarray_fnc instead of arrfnc
- * you can define SHEEP_DYNARRAY_NOSHORTHAND
+ * If you don't want arrfnc shorthand
+ * to dynarray_fnc then define SHEEP_DYNARRAY_NOSHORTHAND
  * to avoid name collision
  *
  * If you want to use custom alloactor,
