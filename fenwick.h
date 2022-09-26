@@ -1,6 +1,7 @@
 /**
  * @file fenwick.h
  * @brief generic type fenwick tree in C.
+ *
  * sleepntsheep 2022
  */
 #pragma once
