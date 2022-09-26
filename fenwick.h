@@ -1,3 +1,11 @@
+/* fenwick.h - generic type fenwick tree in C
+ * usage: FENWICK_DECL(type)
+ *
+ * note: parameter a in fenwick_type_new **must**
+ * be one-indexed-array, not zero-indexed-array
+ *
+ * sleepntsheep 2022
+ */
 #ifndef SHEEP_FENWICK_H
 #define SHEEP_FENWICK_H
 #include <stdlib.h>
@@ -31,12 +39,12 @@
     } \
 \
     type fenwick_##type##_query(fenwick_##type##_t t, long i) { \
-        type sum = zero; \
+        type range = zero; \
         while (i > 0) { \
-            sum = updatefnc(t.a[i], sum); \
+            range = updatefnc(t.a[i], sum); \
             i -= i & -i; \
         } \
-        return sum; \
+        return range; \
     }
 
 
