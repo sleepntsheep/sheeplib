@@ -11,5 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: DenverCoder1/doxygen-github-pages-action@v1.1.0
-        with
+        with:
+          folder: docs
           github_token: ${{ secrets.GITHUB_TOKEN }}
