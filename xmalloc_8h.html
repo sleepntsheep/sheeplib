@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.17"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>sheeplib: File List</title>
+<title>sheeplib: xmalloc.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -46,7 +46,6 @@ $(function() {
 });
 /* @license-end */</script>
 <div id="main-nav"></div>
-</div><!-- top -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -61,24 +60,43 @@ $(function() {
 </iframe>
 </div>
 
+</div><!-- top -->
 <div class="header">
+  <div class="summary">
+<a href="#define-members">Macros</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">File List</div>  </div>
+<div class="title">xmalloc.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock">Here is a list of all documented files with brief descriptions:</div><div class="directory">
-<table class="directory">
-<tr id="row_0_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><a href="algo_8h_source.html"><span class="icondoc"></span></a><b>algo.h</b></td><td class="desc"></td></tr>
-<tr id="row_1_"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><a href="dynarray_8h_source.html"><span class="icondoc"></span></a><a class="el" href="dynarray_8h.html" target="_self">dynarray.h</a></td><td class="desc">Generic dynamic array </td></tr>
-<tr id="row_2_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><a href="fenwick_8h_source.html"><span class="icondoc"></span></a><a class="el" href="fenwick_8h.html" target="_self">fenwick.h</a></td><td class="desc">Generic type fenwick tree in C </td></tr>
-<tr id="row_3_"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><a href="list_8h_source.html"><span class="icondoc"></span></a><b>list.h</b></td><td class="desc"></td></tr>
-<tr id="row_4_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><a href="log_8h_source.html"><span class="icondoc"></span></a><a class="el" href="log_8h.html" target="_self">log.h</a></td><td class="desc">Logging functions </td></tr>
-<tr id="row_5_"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><a href="sjson_8h_source.html"><span class="icondoc"></span></a><a class="el" href="sjson_8h.html" target="_self">sjson.h</a></td><td class="desc">Simple json parser </td></tr>
-<tr id="row_6_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><a href="str_8h_source.html"><span class="icondoc"></span></a><b>str.h</b></td><td class="desc"></td></tr>
-<tr id="row_7_"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><a href="xmalloc_8h_source.html"><span class="icondoc"></span></a><a class="el" href="xmalloc_8h.html" target="_self">xmalloc.h</a></td><td class="desc">X-wrapper for malloc, realloc, calloc, free </td></tr>
+
+<p>x-wrapper for malloc, realloc, calloc, free  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &lt;stddef.h&gt;</code><br />
+</div>
+<p><a href="xmalloc_8h_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ac5cbfc8d0ebe5a65214c0969b56aab02"><td class="memItemLeft" align="right" valign="top"><a id="ac5cbfc8d0ebe5a65214c0969b56aab02"></a>
+void *&#160;</td><td class="memItemRight" valign="bottom"><b>check_alloc</b> (void *ptr)</td></tr>
+<tr class="separator:ac5cbfc8d0ebe5a65214c0969b56aab02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42ccfa6fc49cc4ce90cc44cd05052490"><td class="memItemLeft" align="right" valign="top"><a id="a42ccfa6fc49cc4ce90cc44cd05052490"></a>
+void *&#160;</td><td class="memItemRight" valign="bottom"><b>xmalloc</b> (size_t size)</td></tr>
+<tr class="separator:a42ccfa6fc49cc4ce90cc44cd05052490"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf4d2a0b6c4f9229a0f4687202abed54"><td class="memItemLeft" align="right" valign="top"><a id="acf4d2a0b6c4f9229a0f4687202abed54"></a>
+void *&#160;</td><td class="memItemRight" valign="bottom"><b>xcalloc</b> (size_t nmemb, size_t size)</td></tr>
+<tr class="separator:acf4d2a0b6c4f9229a0f4687202abed54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a93a8ec6e8a6eef0f62b7e5b50d0bf9e4"><td class="memItemLeft" align="right" valign="top"><a id="a93a8ec6e8a6eef0f62b7e5b50d0bf9e4"></a>
+void *&#160;</td><td class="memItemRight" valign="bottom"><b>xrealloc</b> (void *ptr, size_t size)</td></tr>
+<tr class="separator:a93a8ec6e8a6eef0f62b7e5b50d0bf9e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-</div><!-- directory -->
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>x-wrapper for malloc, realloc, calloc, free </p>
+<ul>
+<li>sleepntsheep 2022 </li>
+</ul>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">
