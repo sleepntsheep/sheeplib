@@ -143,15 +143,13 @@ describe(dynarray) {
         temp.a = 1; temp.b = 5;
         ee.a = 1; temp.b = 5;
 
-        (sa) = dynarray_ensure_empty((sa), 1); 
-        (sa)[dynarray_len(sa)] = (temp); 
-        dynarray_info(sa)->length++; 
+        arrpush(sa, temp);
         arrpush(sa, ee);
         asserteq_int(arrpop(sa).a, 1);
         asserteq_int(arrpop(sa).b, 5);
         arrfree(a);
+        arrfree(sa);
     }
-
 }
 
 describe(str) {
@@ -583,6 +581,7 @@ describe(fenwick) {
             asserteq_int(i * (i+1) / 2, oti);
             x += oti;
         }
+        free(a);
     }
 }
 

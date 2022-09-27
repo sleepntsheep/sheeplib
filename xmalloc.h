@@ -1,7 +1,7 @@
-/* xmalloc.h - sleepntsheep 2022
- * need to be used with log.h
- * xmalloc may be considered harmful
- * but sometimes it's useful
+/** @file xmalloc.h 
+ * @brief x-wrapper for malloc, realloc, calloc, free
+ *
+ * - sleepntsheep 2022
  * */
 
 #pragma once
@@ -38,6 +38,11 @@ void *xcalloc(size_t nmemb, size_t size) {
 
 void *xrealloc(void *ptr, size_t size) {
     return check_alloc(realloc(ptr, size));
+}
+
+void xfree(void *ptr) {
+    if (ptr != NULL)
+        free(ptr);
 }
 
 #endif /* SHEEP_XMALLOC_IMPLEMENTATION */
