@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['buf_1',['buf',['../structsjsonbuf.html#a2fb48c8edb2a0b14c090d67d12979e71',1,'sjsonbuf']]]
+  ['buf_0',['buf',['../structsjsonbuf.html#a2fb48c8edb2a0b14c090d67d12979e71',1,'sjsonbuf']]]
 ];
