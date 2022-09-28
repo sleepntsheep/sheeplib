@@ -80,6 +80,8 @@ describe(dynarray) {
         arrdel(a, 2);
         asserteq_int(a[2], 3);
         asserteq_int(arrlen(a), 4);
+        arrdel(a, 0);
+        asserteq_int(a[0], 1);
     }
 
     it("array ins") {
