@@ -224,7 +224,7 @@ static T *dynarray_growf_wrapper(T *a, long cap, long membsize) {
  * @return pointer to dynamic array (might be moved by realloc)
  */
 #define dynarray_setlen(A, n)                                                  \
-    ((A) = dynarray_setcap((A), (n)), dynarray_info(A)->length = (n), (A))
+    (dynarray_setcap((A), (n)), dynarray_info(A)->length = (n), (A))
 
 #endif /* SHEEP_DYNARRAY_H */
 
