@@ -5,6 +5,7 @@
 int main() {
     int *a;
 
+    /* arrpush , arrlen test */
     {
         a = arrnew;
         arrpush(a, 5);
@@ -13,6 +14,7 @@ int main() {
         arrfree(a);
     }
 
+    /* arrcap test */
     {
         a = arrnew;
         arrpush(a, 5);
@@ -24,6 +26,8 @@ int main() {
         assert(arrcap(a) == 8);
         arrfree(a);
     }
+
+    /* arrpush test */
     {
         a = arrnew;
         for (int i = 0; i < 10; i++) {
@@ -33,6 +37,7 @@ int main() {
         arrfree(a);
     }
 
+    /* arrdel test */
     {
         a = arrnew;
         for (int i = 0; i < 5; i++)
@@ -44,6 +49,8 @@ int main() {
         assert(a[0] == 1);
         arrfree(a);
     }
+
+    /* arrins test */
     {
         a = arrnew;
         for (int i = 0; i < 5; i++)
@@ -70,6 +77,8 @@ int main() {
         }
         arrfree(a);
     }
+
+    /* arrsetlen test */
     {
         a = arrnew;
         for (int i = 0; i < 1000; i++)
@@ -82,6 +91,8 @@ int main() {
         assert(a[500] == -1);
         arrfree(a);
     }
+
+    /* arrpop and other types test */
     {
         struct sa {
             int a, b;

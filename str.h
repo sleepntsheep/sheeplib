@@ -194,7 +194,10 @@ struct str str_substr(struct str str, size_t start, size_t end) {
     /* We can't get rid of NUL-terminated string, sadly
      * many library depend on that and if we do we will have
      * to implement too much thing like printf replacement */
-    struct str substring = {.l = end - start + 1, .c = end - start + 2};
+    struct str substring = {
+        .b = 0,
+        .c = end - start + 2.l = end - start + 1,
+    };
     str_resize(&substring, substring.c);
     strncpy(substring.b, str.b + start, substring.l);
     substring.b[substring.l] = '\x0';
