@@ -1,35 +1,33 @@
-//usr/bin/clang "$0" && exec ./a.out "$@"
+// usr/bin/clang "$0" && exec ./a.out "$@"
 
 #include <stdio.h>
-#include <time.h>
 #include <stdlib.h>
+#include <time.h>
 #define SHEEP_DYNARRAY_IMPLEMENTATION
 #include "../dynarray.h"
 #define SHEEP_STR_IMPLEMENTATION
-#include "../str.h"
 #include "../algo.h"
+#include "../str.h"
 #define SHEEP_SJSON_IMPLEMENTATION
 #include "../sjson.h"
 #define SHEEP_LOG_IMPLEMENTATION
-#include "../log.h"
 #include "../fenwick.h"
+#include "../log.h"
 #define SNOW_ENABLED
 #include "snow.h"
 
-/* 
- * TODO 
- *     add more complicated nested sjson.h test cases 
+/*
+ * TODO
+ *     add more complicated nested sjson.h test cases
  */
 
-uint64_t intadd(uint64_t a, uint64_t b) {
-    return a+b;
-}
+uint64_t intadd(uint64_t a, uint64_t b) { return a + b; }
 
 int *rndarr(int size) {
     int i;
     int *a = arrnew;
     for (i = 0; i < arrlen(a); i++)
-         arrpop(a);
+        arrpop(a);
     for (i = 0; i < size; i++) {
         int b = rand() % 65531;
         arrpush(a, b);
@@ -37,11 +35,9 @@ int *rndarr(int size) {
     return a;
 }
 
-int cmpm(int a, int b) {
-	return a-b;
-}
+int cmpm(int a, int b) { return a - b; }
 
-SALGO_DECL(int,cmpm)
+SALGO_DECL(int, cmpm)
 
 describe(dynarray) {
     it("array len") {
@@ -66,8 +62,7 @@ describe(dynarray) {
 
     it("array push") {
         int *a = arrnew, i;
-        for (i = 0; i < 10; i++)
-        {
+        for (i = 0; i < 10; i++) {
             arrpush(a, i);
             assert(a[i] == i);
         }
@@ -105,8 +100,7 @@ describe(dynarray) {
         arrins(a, 6, -2);
         assert(a[6] == -2);
         n = arrlen(a);
-        for (i = n; i < n + 5; i++)
-        {
+        for (i = n; i < n + 5; i++) {
             arrins(a, i, i);
             assert(a[i] == i);
         }
@@ -127,10 +121,12 @@ describe(dynarray) {
     }
 
     it("arrpop_test") {
-        struct sa {int a, b;};
+        struct sa {
+            int a, b;
+        };
         struct sa ee, temp, *sa;
         int *a = arrnew;
-        assert(sizeof(sa) == sizeof(int)*2);
+        assert(sizeof(sa) == sizeof(int) * 2);
         arrpush(a, 1);
         arrpush(a, 1);
         arrpush(a, 1);
@@ -142,8 +138,10 @@ describe(dynarray) {
         asserteq_int(arrpop(a), 1);
         asserteq_int(arrpop(a), 1);
         sa = arrnew;
-        temp.a = 1; temp.b = 5;
-        ee.a = 1; temp.b = 5;
+        temp.a = 1;
+        temp.b = 5;
+        ee.a = 1;
+        temp.b = 5;
 
         arrpush(sa, temp);
         arrpush(sa, ee);
@@ -175,7 +173,7 @@ describe(str) {
         asserteq_str(s.b, "Hello WorldPOG");
         free(s.b);
         s = str_new();
-        for (int i =0 ;i < 10000; i++)
+        for (int i = 0; i < 10000; i++)
             str_catc(&s, "EEEEEEEEEE");
         asserteq_int(s.l, 100000);
         free(s.b);
@@ -204,7 +202,7 @@ describe(str) {
         asserteq_str(sub.b, "r Mac");
         assert(!str_cmpc(sub, "r Mac"));
         free(sub.b);
-    } 
+    }
 
     it("str_cmp") {
         str s = str_from_c("Paper Machine");
@@ -226,7 +224,7 @@ describe(str) {
     }
 
     it("str_cmp") {
-        struct str s = str_from_c ("POG Duck Duck");
+        struct str s = str_from_c("POG Duck Duck");
         struct str s2 = str_from_c("Duck POG POG");
         assert(str_cmp(s, s2) > 0);
     }
@@ -305,7 +303,7 @@ describe(algo) {
     it("ssort") {
         ssort_int(a, n);
         for (j = 0; j < n - 1; j++)
-            assert(a[j] <= a[j+1]);
+            assert(a[j] <= a[j + 1]);
     }
     arrfree(a);
 
@@ -334,7 +332,7 @@ describe(algo) {
             assert(*low == i);
             assert(low - a == i);
         }
-        assert(slowerbound_int(n+1, a, n) == NULL);
+        assert(slowerbound_int(n + 1, a, n) == NULL);
     }
     arrfree(a);
 }
@@ -363,8 +361,8 @@ describe(json) {
     }
 
     it("parse positive int") {
-        const char *nums[] = { "2", "3", "4", "5", "6", "10000" };
-        const int ans[] = { 2, 3, 4, 5, 6, 10000 };
+        const char *nums[] = {"2", "3", "4", "5", "6", "10000"};
+        const int ans[] = {2, 3, 4, 5, 6, 10000};
         for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
             sjson_result r = sjson_deserialize(nums[i], strlen(nums[i]));
             asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
@@ -375,8 +373,8 @@ describe(json) {
     }
 
     it("parse negative int") {
-        const char *nums[] = { "-2", "-3", "-4", "-5", "-6", "-10000" };
-        const int ans[] = { -2, -3, -4, -5, -6, -10000 };
+        const char *nums[] = {"-2", "-3", "-4", "-5", "-6", "-10000"};
+        const int ans[] = {-2, -3, -4, -5, -6, -10000};
         for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
             sjson_result r = sjson_deserialize(nums[i], strlen(nums[i]));
             asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
@@ -387,7 +385,7 @@ describe(json) {
     }
 
     it("parse zero") {
-        const char *nums[] = { "0", "00", "000", "0000", "00000" };
+        const char *nums[] = {"0", "00", "000", "0000", "00000"};
         for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
             sjson_result r = sjson_deserialize(nums[i], strlen(nums[i]));
             asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
@@ -398,8 +396,9 @@ describe(json) {
     }
 
     it("parse positive floating") {
-        const char *nums[] = { "2.213", "3.9203", "4.23", "5.738", "6.01", "10000.389" };
-        const double ans[] = { 2.213, 3.9203, 4.23, 5.738, 6.01, 10000.389 };
+        const char *nums[] = {"2.213", "3.9203", "4.23",
+                              "5.738", "6.01",   "10000.389"};
+        const double ans[] = {2.213, 3.9203, 4.23, 5.738, 6.01, 10000.389};
         for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
             sjson_result r = sjson_deserialize(nums[i], strlen(nums[i]));
             asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
@@ -410,8 +409,10 @@ describe(json) {
     }
 
     it("parse negative floating") {
-        const char *nums[] = { "-2.213", "-3.9203", "-4.23", "-5.738", "-6.01", "-10000.389" };
-        const double ans[] = { -2.213, -3.9203, -4.23, -5.738, -6.01, -10000.389 };
+        const char *nums[] = {"-2.213", "-3.9203", "-4.23",
+                              "-5.738", "-6.01",   "-10000.389"};
+        const double ans[] = {-2.213, -3.9203, -4.23,
+                              -5.738, -6.01,   -10000.389};
         for (int i = 0; i < sizeof nums / sizeof *nums; i++) {
             sjson_result r = sjson_deserialize(nums[i], strlen(nums[i]));
             asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
@@ -422,8 +423,8 @@ describe(json) {
     }
 
     it("parse string") {
-        char *strs[] = { "\"POOOG\"", "\"SHIEN\"", "\"WATER\"", "\"Kronii\"" };
-        char *ans[] = { "POOOG", "SHIEN", "WATER", "Kronii" };
+        char *strs[] = {"\"POOOG\"", "\"SHIEN\"", "\"WATER\"", "\"Kronii\""};
+        char *ans[] = {"POOOG", "SHIEN", "WATER", "Kronii"};
         for (int i = 0; i < sizeof strs / sizeof *strs; i++) {
             sjson_result r = sjson_deserialize(strs[i], strlen(strs[i]));
             asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
@@ -434,8 +435,8 @@ describe(json) {
     }
 
     it("parse escape code") {
-        char *strs[] = { "\"\\n\"", "\"\\r\"", "\"QE 2 is dedge\\t\"" };
-        char *ans[] = { "\n", "\r", "QE 2 is dedge\t" };
+        char *strs[] = {"\"\\n\"", "\"\\r\"", "\"QE 2 is dedge\\t\""};
+        char *ans[] = {"\n", "\r", "QE 2 is dedge\t"};
         for (int i = 0; i < sizeof strs / sizeof *strs; i++) {
             sjson_result r = sjson_deserialize(strs[i], strlen(strs[i]));
             asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
@@ -460,8 +461,8 @@ describe(json) {
     */
 
     it("parse utf8") {
-        char *strs[] = { "\"💀sdjoiad\"", "\"🥴🥴\"" };
-        char *ans[] = { "💀sdjoiad", "🥴🥴" };
+        char *strs[] = {"\"💀sdjoiad\"", "\"🥴🥴\""};
+        char *ans[] = {"💀sdjoiad", "🥴🥴"};
         for (int i = 0; i < sizeof strs / sizeof *strs; i++) {
             sjson_result r = sjson_deserialize(strs[i], strlen(strs[i]));
             asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
@@ -513,8 +514,11 @@ describe(json) {
         asserteq_int(r.json->v.child->next->next->next->v.num, 4);
         asserteq_int(r.json->v.child->next->next->next->next->v.num, 5);
         asserteq_int(r.json->v.child->next->next->next->next->next->v.num, 6);
-        asserteq_int(r.json->v.child->next->next->next->next->next->next->v.num, 7);
-        asserteq_int(r.json->v.child->next->next->next->next->next->next->next->v.num, 8);
+        asserteq_int(r.json->v.child->next->next->next->next->next->next->v.num,
+                     7);
+        asserteq_int(
+            r.json->v.child->next->next->next->next->next->next->next->v.num,
+            8);
     }
 
     it("parse mixed array") {
@@ -542,8 +546,10 @@ describe(json) {
         asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
         asserteq_int(r.json->type, SJSON_OBJECT);
         assertneq_ptr(r.json->v.child, NULL);
-        asserteq_str(r.json->v.child->key, "key");;
-        asserteq_str(r.json->v.child->v.str, "value");;
+        asserteq_str(r.json->v.child->key, "key");
+        ;
+        asserteq_str(r.json->v.child->v.str, "value");
+        ;
         asserteq_str(r.json->v.child->next->key, "num");
         assert(r.json->v.child->next->v.num == -2839.489);
     }
@@ -555,8 +561,10 @@ describe(json) {
         asserteq_str(sjson_errnames[r.err], "SJSON_SUCCESS");
         asserteq_int(r.json->type, SJSON_OBJECT);
         assertneq_ptr(r.json->v.child, NULL);
-        asserteq_str(r.json->v.child->key, "key");;
-        asserteq_str(r.json->v.child->v.str, "value");;
+        asserteq_str(r.json->v.child->key, "key");
+        ;
+        asserteq_str(r.json->v.child->v.str, "value");
+        ;
         asserteq_str(r.json->v.child->next->key, "nest");
         asserteq_int(r.json->v.child->next->type, SJSON_OBJECT);
         asserteq_ptr(r.json->v.child->next->v.child, NULL);
@@ -564,9 +572,7 @@ describe(json) {
 }
 
 describe(log) {
-    it("warn") {
-        warn("warn");
-    }
+    it("warn") { warn("warn"); }
 }
 
 FENWICK_DECL(uint64_t, 0, intadd)
@@ -574,13 +580,14 @@ FENWICK_DECL(uint64_t, 0, intadd)
 describe(fenwick) {
     it("addint") {
         int n = 1000000;
-        uint64_t *a = calloc(n+2, sizeof *a);
+        uint64_t *a = (uint64_t *)calloc(n + 2, sizeof *a);
         uint64_t x;
-        for (int i = 1; i <= n; i++) a[i] = i;
+        for (int i = 1; i <= n; i++)
+            a[i] = i;
         fenwick_uint64_t_t f = fenwick_uint64_t_new(a, n);
         for (uint64_t i = 1; i <= n; i++) {
             uint64_t oti = fenwick_uint64_t_query(f, i);
-            asserteq_int(i * (i+1) / 2, oti);
+            asserteq_int(i * (i + 1) / 2, oti);
             x += oti;
         }
         free(a);

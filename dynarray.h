@@ -2,7 +2,7 @@
  * @file dynarray.h
  * @brief Generic dynamic array
  *
- * dynarray.h - v0.03 - sleepntsheep 2022
+ * dynarray.h - v0.04 - sleepntsheep 2022
  * dynarray.h is single-header library for
  * dynamic array in C, similar to std::vector in C++
  *
@@ -45,7 +45,20 @@
  * - this library *cannot* be used in C++,
  * due to C++ not allowing implicit pointer conversion
  * you shouldn't use this in C++ anyway, use std::vector
+ *
+ *
+ * Change Notes:
+ * v 0.0.4:
+ *  - dynarray_setcap() now modify the pointer by itself, no need to do
+ *      A = dynarray_setcap(A, newcap)
+ *      just do
+ *      dynarray_setcap(A, newcap)
+ *  - C++ support, via some preprocessing things and template
  * */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #pragma once
 
@@ -93,12 +106,27 @@ struct _dynarray_info {
 static void *dynarray_growf(void *a, long cap, long membsize);
 static long dynarray_first_2n_bigger_than(long x);
 
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+/* C++ is bad and don't have implicit pointer conversion so we're stuck with
+ * this */
+template <class T>
+static T *dynarray_growf_wrapper(T *a, long cap, long membsize) {
+    return (T *)dynarray_growf(a, cap, membsize);
+}
+#else
+#define dynarray_growf_wrapper dynarray_growf
+#endif /* __cplusplus */
+
 /**
  * @brief NULL, this is to make code more clear that the pointer is dynamic
  * array
  * @return pointer to the dynamic array
  */
-#define dynarray_new ((void *)0)
+#define dynarray_new NULL
 /**
  * @brief if space is not enough for adding n more new elements, grow array to
  * smallest power of two that fit
@@ -133,7 +161,7 @@ static long dynarray_first_2n_bigger_than(long x);
  */
 #define dynarray_push(A, x)                                                    \
     do {                                                                       \
-        (A) = dynarray_ensure_empty((A), 1);                                   \
+        dynarray_ensure_empty((A), 1);                                         \
         (A)[dynarray_len(A)] = (x);                                            \
         dynarray_info(A)->length++;                                            \
     } while (0)
@@ -146,7 +174,7 @@ static long dynarray_first_2n_bigger_than(long x);
  */
 #define dynarray_ins(A, idx, x)                                                \
     do {                                                                       \
-        (A) = dynarray_ensure_empty((A), 1);                                   \
+        dynarray_ensure_empty((A), 1);                                         \
         for (long i = idx; i <= dynarray_len(A); i++)                          \
             (A)[i + 1] = (A)[i];                                               \
         (A)[idx] = (x);                                                        \
@@ -167,7 +195,7 @@ static long dynarray_first_2n_bigger_than(long x);
 /**
  * @brief free dynamic array
  */
-#define dynarray_free(A) ((A) ? DYNARRAY_FREE(dynarray_info(A)) : 0)
+#define dynarray_free(A) ((A) ? DYNARRAY_FREE(dynarray_info(A)), 0 : 0)
 /**
  * @brief return length of dynamic array
  * @param A dynamic array
@@ -187,7 +215,8 @@ static long dynarray_first_2n_bigger_than(long x);
  * @param n new capacity
  * @return pointer to dynamic array (might be moved by realloc)
  */
-#define dynarray_setcap(A, n) dynarray_growf((A), (n), sizeof(*(A)))
+#define dynarray_setcap(A, n)                                                  \
+    (A = dynarray_growf_wrapper((A), (n), sizeof(*(A))))
 /**
  * @brief set length of dynamic array to n, set capacity if needed
  * @param A dynamic array
