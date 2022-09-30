@@ -14,6 +14,20 @@ int main() {
         arrfree(a);
     }
 
+    {
+        const int b[] = {1, 2, 3, 4, 5};
+        a = arrnew;
+        dynarray_pushn(a, b, 5);
+        assert(arrlen(a) == 5);
+        assert(a[0] == 1);
+        assert(a[1] == 2);
+        assert(a[2] == 3);
+        assert(a[3] == 4);
+        assert(a[4] == 5);
+        const char c[] = "POOOOG";
+        dynarray_pushn(a, c, 5);
+    }
+
     /* arrcap test */
     {
         a = arrnew;

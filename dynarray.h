@@ -80,6 +80,16 @@ extern "C" {
 #define DYNARRAY_FREE free
 #endif /* DYNARRAY_FREE */
 
+#ifndef DYNARRAY_MEMCPY
+#include <string.h>
+#define DYNARRAY_MEMCPY memcpy
+#endif /* DYNARRAY_MEMCPY */
+
+#ifndef DYNARRAY_ASSERT
+#include <assert.h>
+#define DYNARRAY_ASSERT assert
+#endif /* DYNARRAY_ASSERT */
+
 struct _dynarray_info {
     long length;   /* dynamic array length */
     long capacity; /* dynamic array capacity */
@@ -100,6 +110,7 @@ struct _dynarray_info {
 #define arrsetlen dynarray_setlen
 #define arrsetcap dynarray_setcap
 #define arrins dynarray_ins
+#define arrpushn dynarray_pushn
 
 #endif /* SHEEP_DYNARRAY_NOSHORTHAND */
 
@@ -225,6 +236,21 @@ static T *dynarray_growf_wrapper(T *a, long cap, long membsize) {
  */
 #define dynarray_setlen(A, n)                                                  \
     (dynarray_setcap((A), (n)), dynarray_info(A)->length = (n), (A))
+/**
+ * @brief push n element starting at pointer p to dynamic array
+ * @param A dynamic array
+ * @param p location of elements
+ * @param n count of elements to push
+ *
+ * sizeof type of element that p is pointing to ***must*** be
+ * equal to sizeof element of dynamic array, and n is count of
+ * elements, not total size, not bytes to copy
+ */
+#define dynarray_pushn(A, p, n)                                                \
+    DYNARRAY_ASSERT(sizeof(*(p)) == sizeof(*(A)));                             \
+    dynarray_ensure_empty((A), (n));                                           \
+    DYNARRAY_MEMCPY((A) + dynarray_len(A), p, sizeof *(p)*n);                  \
+    dynarray_info(A)->length += n;
 
 #endif /* SHEEP_DYNARRAY_H */
 
