@@ -70,6 +70,14 @@
         __stderr_log("INFO", __FL__, __VA_ARGS__);                             \
         perror("");                                                            \
     } while (0)
+/**
+ * @brief log unimplemented control flow
+ */
+#define unimplemented(...) __stderr_log("UNIMPLEMENTED", __FL__, __VA_ARGS__);
+/**
+ * @brief log control flow that should be unreachable
+ */
+#define unreachable(...) __stderr_log("UNREACHABLE", __FL__, __VA_ARGS__);
 
 void __stderr_log(const char *type, const char *file, const int line,
                   const char *fmt, ...);
