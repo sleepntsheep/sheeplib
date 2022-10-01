@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['info_0',['info',['../log_8h.html#a6576e6f80131b01ef1bca232282ef26b',1,'log.h']]],
-  ['infoerr_1',['infoerr',['../log_8h.html#ae0bd46481b404d5364006133b59287eb',1,'log.h']]]
+  ['panic_0',['panic',['../log_8h.html#a1445e207e36c97ff84c54b47288cea19',1,'log.h']]],
+  ['panicerr_1',['panicerr',['../log_8h.html#a50814ad58e0c48a7dee787060dc28035',1,'log.h']]]
 ];
