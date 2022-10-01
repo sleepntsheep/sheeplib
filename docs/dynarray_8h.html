@@ -73,6 +73,8 @@ $(function() {
 <p>Generic dynamic array.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;stdlib.h&gt;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
+<code>#include &lt;assert.h&gt;</code><br />
 </div>
 <p><a href="dynarray_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -95,6 +97,12 @@ Macros</h2></td></tr>
 <tr class="memitem:a91535302b0ea91a3cf532bace9010d59"><td class="memItemLeft" align="right" valign="top"><a id="a91535302b0ea91a3cf532bace9010d59" name="a91535302b0ea91a3cf532bace9010d59"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>DYNARRAY_FREE</b>&#160;&#160;&#160;free</td></tr>
 <tr class="separator:a91535302b0ea91a3cf532bace9010d59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44139bbc90858ef0081438be3c90591f"><td class="memItemLeft" align="right" valign="top"><a id="a44139bbc90858ef0081438be3c90591f" name="a44139bbc90858ef0081438be3c90591f"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>DYNARRAY_MEMCPY</b>&#160;&#160;&#160;memcpy</td></tr>
+<tr class="separator:a44139bbc90858ef0081438be3c90591f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0b3edce34b34dc67077223d9f7c96ea"><td class="memItemLeft" align="right" valign="top"><a id="ac0b3edce34b34dc67077223d9f7c96ea" name="ac0b3edce34b34dc67077223d9f7c96ea"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>DYNARRAY_ASSERT</b>&#160;&#160;&#160;assert</td></tr>
+<tr class="separator:ac0b3edce34b34dc67077223d9f7c96ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd92b245b42a806a09ff62403135499f"><td class="memItemLeft" align="right" valign="top"><a id="abd92b245b42a806a09ff62403135499f" name="abd92b245b42a806a09ff62403135499f"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>DYNARRAY_MIN_CAPACITY</b>&#160;&#160;&#160;4</td></tr>
 <tr class="separator:abd92b245b42a806a09ff62403135499f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -131,7 +139,13 @@ Macros</h2></td></tr>
 <tr class="memitem:a0f32c7c5ed6f589d6d78286307dce41b"><td class="memItemLeft" align="right" valign="top"><a id="a0f32c7c5ed6f589d6d78286307dce41b" name="a0f32c7c5ed6f589d6d78286307dce41b"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>arrins</b>&#160;&#160;&#160;<a class="el" href="dynarray_8h.html#a9ce5e52e9cf16e09f37b0596fd3b65e7">dynarray_ins</a></td></tr>
 <tr class="separator:a0f32c7c5ed6f589d6d78286307dce41b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5e3a2a3f2bdb56d2aaeb1d29884aaf67"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dynarray_8h.html#a5e3a2a3f2bdb56d2aaeb1d29884aaf67">dynarray_new</a>&#160;&#160;&#160;((void *)0)</td></tr>
+<tr class="memitem:a519a464481f21214937fb7019d7f3cd0"><td class="memItemLeft" align="right" valign="top"><a id="a519a464481f21214937fb7019d7f3cd0" name="a519a464481f21214937fb7019d7f3cd0"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>arrpushn</b>&#160;&#160;&#160;<a class="el" href="dynarray_8h.html#acee1a92194c2c04c113da0d3ee03b642">dynarray_pushn</a></td></tr>
+<tr class="separator:a519a464481f21214937fb7019d7f3cd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a094ebeb67b5218729324fdc435243e1d"><td class="memItemLeft" align="right" valign="top"><a id="a094ebeb67b5218729324fdc435243e1d" name="a094ebeb67b5218729324fdc435243e1d"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>dynarray_growf_wrapper</b>&#160;&#160;&#160;dynarray_growf</td></tr>
+<tr class="separator:a094ebeb67b5218729324fdc435243e1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e3a2a3f2bdb56d2aaeb1d29884aaf67"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dynarray_8h.html#a5e3a2a3f2bdb56d2aaeb1d29884aaf67">dynarray_new</a>&#160;&#160;&#160;NULL</td></tr>
 <tr class="memdesc:a5e3a2a3f2bdb56d2aaeb1d29884aaf67"><td class="mdescLeft">&#160;</td><td class="mdescRight">NULL, this is to make code more clear that the pointer is dynamic array.  <a href="dynarray_8h.html#a5e3a2a3f2bdb56d2aaeb1d29884aaf67">More...</a><br /></td></tr>
 <tr class="separator:a5e3a2a3f2bdb56d2aaeb1d29884aaf67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6fb6e8531292d27297bf74cf34fbc2b1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dynarray_8h.html#a6fb6e8531292d27297bf74cf34fbc2b1">dynarray_ensure_empty</a>(A,  n)&#160;&#160;&#160;    (<a class="el" href="dynarray_8h.html#a7acbaf0697a61afd63e2bc5df575a497">dynarray_setcap</a>((A), dynarray_first_2n_bigger_than(<a class="el" href="dynarray_8h.html#ade1abcf1d60bf24b2e02737e6e9b7511">dynarray_len</a>(A) + (n))))</td></tr>
@@ -156,7 +170,7 @@ Macros</h2></td></tr>
 <tr class="memdesc:a17a10da194a35fee54aedffdf80b93b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">delete element at index idx from array, moving all latter element to the left  <a href="dynarray_8h.html#a17a10da194a35fee54aedffdf80b93b0">More...</a><br /></td></tr>
 <tr class="separator:a17a10da194a35fee54aedffdf80b93b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a878d7b374cb6b602db027839bd57eef4"><td class="memItemLeft" align="right" valign="top"><a id="a878d7b374cb6b602db027839bd57eef4" name="a878d7b374cb6b602db027839bd57eef4"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>dynarray_free</b>(A)&#160;&#160;&#160;((A) ? DYNARRAY_FREE(<a class="el" href="dynarray_8h.html#a0da667355c9aa3ab9a816b74eddbb624">dynarray_info</a>(A)) : 0)</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>dynarray_free</b>(A)&#160;&#160;&#160;((A) ? DYNARRAY_FREE(<a class="el" href="dynarray_8h.html#a0da667355c9aa3ab9a816b74eddbb624">dynarray_info</a>(A)), 0 : 0)</td></tr>
 <tr class="memdesc:a878d7b374cb6b602db027839bd57eef4"><td class="mdescLeft">&#160;</td><td class="mdescRight">free dynamic array <br /></td></tr>
 <tr class="separator:a878d7b374cb6b602db027839bd57eef4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade1abcf1d60bf24b2e02737e6e9b7511"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dynarray_8h.html#ade1abcf1d60bf24b2e02737e6e9b7511">dynarray_len</a>(A)&#160;&#160;&#160;((A) ? <a class="el" href="dynarray_8h.html#a0da667355c9aa3ab9a816b74eddbb624">dynarray_info</a>(A)-&gt;length : 0)</td></tr>
@@ -165,16 +179,19 @@ Macros</h2></td></tr>
 <tr class="memitem:a08c19b5a51886238c09374b9d467dc8d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dynarray_8h.html#a08c19b5a51886238c09374b9d467dc8d">dynarray_cap</a>(A)&#160;&#160;&#160;    ((A) ? <a class="el" href="dynarray_8h.html#a0da667355c9aa3ab9a816b74eddbb624">dynarray_info</a>(A)-&gt;capacity : DYNARRAY_MIN_CAPACITY)</td></tr>
 <tr class="memdesc:a08c19b5a51886238c09374b9d467dc8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">return capacity of dynamic array  <a href="dynarray_8h.html#a08c19b5a51886238c09374b9d467dc8d">More...</a><br /></td></tr>
 <tr class="separator:a08c19b5a51886238c09374b9d467dc8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7acbaf0697a61afd63e2bc5df575a497"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dynarray_8h.html#a7acbaf0697a61afd63e2bc5df575a497">dynarray_setcap</a>(A,  n)&#160;&#160;&#160;dynarray_growf((A), (n), sizeof(*(A)))</td></tr>
+<tr class="memitem:a7acbaf0697a61afd63e2bc5df575a497"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dynarray_8h.html#a7acbaf0697a61afd63e2bc5df575a497">dynarray_setcap</a>(A,  n)&#160;&#160;&#160;    (A = dynarray_growf_wrapper((A), (n), sizeof(*(A))))</td></tr>
 <tr class="memdesc:a7acbaf0697a61afd63e2bc5df575a497"><td class="mdescLeft">&#160;</td><td class="mdescRight">set capacity of dynamic array to n, realloc if needed  <a href="dynarray_8h.html#a7acbaf0697a61afd63e2bc5df575a497">More...</a><br /></td></tr>
 <tr class="separator:a7acbaf0697a61afd63e2bc5df575a497"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aac06ff379789fa7a62ce53d8dc566745"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dynarray_8h.html#aac06ff379789fa7a62ce53d8dc566745">dynarray_setlen</a>(A,  n)&#160;&#160;&#160;    ((A) = <a class="el" href="dynarray_8h.html#a7acbaf0697a61afd63e2bc5df575a497">dynarray_setcap</a>((A), (n)), <a class="el" href="dynarray_8h.html#a0da667355c9aa3ab9a816b74eddbb624">dynarray_info</a>(A)-&gt;length = (n), (A))</td></tr>
+<tr class="memitem:aac06ff379789fa7a62ce53d8dc566745"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dynarray_8h.html#aac06ff379789fa7a62ce53d8dc566745">dynarray_setlen</a>(A,  n)&#160;&#160;&#160;    (<a class="el" href="dynarray_8h.html#a7acbaf0697a61afd63e2bc5df575a497">dynarray_setcap</a>((A), (n)), <a class="el" href="dynarray_8h.html#a0da667355c9aa3ab9a816b74eddbb624">dynarray_info</a>(A)-&gt;length = (n), (A))</td></tr>
 <tr class="memdesc:aac06ff379789fa7a62ce53d8dc566745"><td class="mdescLeft">&#160;</td><td class="mdescRight">set length of dynamic array to n, set capacity if needed  <a href="dynarray_8h.html#aac06ff379789fa7a62ce53d8dc566745">More...</a><br /></td></tr>
 <tr class="separator:aac06ff379789fa7a62ce53d8dc566745"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acee1a92194c2c04c113da0d3ee03b642"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="dynarray_8h.html#acee1a92194c2c04c113da0d3ee03b642">dynarray_pushn</a>(A,  p,  n)</td></tr>
+<tr class="memdesc:acee1a92194c2c04c113da0d3ee03b642"><td class="mdescLeft">&#160;</td><td class="mdescRight">push n element starting at pointer p to dynamic array  <a href="dynarray_8h.html#acee1a92194c2c04c113da0d3ee03b642">More...</a><br /></td></tr>
+<tr class="separator:acee1a92194c2c04c113da0d3ee03b642"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Generic dynamic array. </p>
-<p ><a class="el" href="dynarray_8h.html" title="Generic dynamic array.">dynarray.h</a> - v0.03 - sleepntsheep 2022 <a class="el" href="dynarray_8h.html" title="Generic dynamic array.">dynarray.h</a> is single-header library for dynamic array in C, similar to std::vector in C++</p>
+<p ><a class="el" href="dynarray_8h.html" title="Generic dynamic array.">dynarray.h</a> - v0.04 - sleepntsheep 2022 <a class="el" href="dynarray_8h.html" title="Generic dynamic array.">dynarray.h</a> is single-header library for dynamic array in C, similar to std::vector in C++</p>
 <p >inspired by <a href="https://github.com/nothings/stb/blob/master/stb_ds.h">https://github.com/nothings/stb/blob/master/stb_ds.h</a></p>
 <p >Instruction &amp; How to use </p><pre class="fragment"> #define SHEEP_DYNARRAY_IMPLEMENTATION
  #include "dynarray.h"
@@ -189,7 +206,11 @@ Macros</h2></td></tr>
 <p >dynarray_new is NULL or (void*)0. It exists for readability of the code, to make it clear that the pointer is a dynamic array.</p>
 <ul>
 <li>arrsort <em>won't</em> be implemented, just use qsort from stdlib</li>
-<li>this library <em>cannot</em> be used in C++, due to C++ not allowing implicit pointer conversion you shouldn't use this in C++ anyway, use std::vector </li>
+<li>this library <em>cannot</em> be used in C++, due to C++ not allowing implicit pointer conversion you shouldn't use this in C++ anyway, use std::vector</li>
+</ul>
+<p >Change Notes: v 0.0.4:</p><ul>
+<li><a class="el" href="dynarray_8h.html#a7acbaf0697a61afd63e2bc5df575a497" title="set capacity of dynamic array to n, realloc if needed">dynarray_setcap()</a> now modify the pointer by itself, no need to do A = <a class="el" href="dynarray_8h.html#a7acbaf0697a61afd63e2bc5df575a497" title="set capacity of dynamic array to n, realloc if needed">dynarray_setcap(A, newcap)</a> just do <a class="el" href="dynarray_8h.html#a7acbaf0697a61afd63e2bc5df575a497" title="set capacity of dynamic array to n, realloc if needed">dynarray_setcap(A, newcap)</a></li>
+<li>C++ support, via some preprocessing things and template </li>
 </ul>
 </div><h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="ac6fabae3ae260c8bc06dcccef48b26d5" name="ac6fabae3ae260c8bc06dcccef48b26d5"></a>
@@ -276,7 +297,7 @@ Macros</h2></td></tr>
 <div class="line">            A[i] = A[i + 1];                                                   \</div>
 <div class="line">        dynarray_info(A)-&gt;length--;                                            \</div>
 <div class="line">    } <span class="keywordflow">while</span> (0)</div>
-<div class="ttc" id="adynarray_8h_html_ade1abcf1d60bf24b2e02737e6e9b7511"><div class="ttname"><a href="dynarray_8h.html#ade1abcf1d60bf24b2e02737e6e9b7511">dynarray_len</a></div><div class="ttdeci">#define dynarray_len(A)</div><div class="ttdoc">return length of dynamic array</div><div class="ttdef"><b>Definition:</b> dynarray.h:176</div></div>
+<div class="ttc" id="adynarray_8h_html_ade1abcf1d60bf24b2e02737e6e9b7511"><div class="ttname"><a href="dynarray_8h.html#ade1abcf1d60bf24b2e02737e6e9b7511">dynarray_len</a></div><div class="ttdeci">#define dynarray_len(A)</div><div class="ttdoc">return length of dynamic array</div><div class="ttdef"><b>Definition:</b> dynarray.h:215</div></div>
 </div><!-- fragment -->
 <p>delete element at index idx from array, moving all latter element to the left </p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -386,13 +407,12 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">    <span class="keywordflow">do</span> {                                                                       \</div>
-<div class="line">        (A) = <a class="code hl_define" href="dynarray_8h.html#a6fb6e8531292d27297bf74cf34fbc2b1">dynarray_ensure_empty</a>((A), 1);                                   \</div>
+<div class="line">        dynarray_ensure_empty((A), 1);                                         \</div>
 <div class="line">        for (<span class="keywordtype">long</span> i = idx; i &lt;= <a class="code hl_define" href="dynarray_8h.html#ade1abcf1d60bf24b2e02737e6e9b7511">dynarray_len</a>(A); i++)                          \</div>
 <div class="line">            (A)[i + 1] = (A)[i];                                               \</div>
 <div class="line">        (A)[idx] = (x);                                                        \</div>
 <div class="line">        dynarray_info(A)-&gt;length++;                                            \</div>
 <div class="line">    } <span class="keywordflow">while</span> (0)</div>
-<div class="ttc" id="adynarray_8h_html_a6fb6e8531292d27297bf74cf34fbc2b1"><div class="ttname"><a href="dynarray_8h.html#a6fb6e8531292d27297bf74cf34fbc2b1">dynarray_ensure_empty</a></div><div class="ttdeci">#define dynarray_ensure_empty(A, n)</div><div class="ttdoc">if space is not enough for adding n more new elements, grow array to smallest power of two that fit</div><div class="ttdef"><b>Definition:</b> dynarray.h:109</div></div>
 </div><!-- fragment -->
 <p>insert element to index idx of array, moving other elements to the right if needed </p>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -440,7 +460,7 @@ Macros</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define dynarray_new&#160;&#160;&#160;((void *)0)</td>
+          <td class="memname">#define dynarray_new&#160;&#160;&#160;NULL</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -503,7 +523,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">    <span class="keywordflow">do</span> {                                                                       \</div>
-<div class="line">        (A) = <a class="code hl_define" href="dynarray_8h.html#a6fb6e8531292d27297bf74cf34fbc2b1">dynarray_ensure_empty</a>((A), 1);                                   \</div>
+<div class="line">        dynarray_ensure_empty((A), 1);                                         \</div>
 <div class="line">        (A)[<a class="code hl_define" href="dynarray_8h.html#ade1abcf1d60bf24b2e02737e6e9b7511">dynarray_len</a>(A)] = (x);                                            \</div>
 <div class="line">        dynarray_info(A)-&gt;length++;                                            \</div>
 <div class="line">    } <span class="keywordflow">while</span> (0)</div>
@@ -516,6 +536,55 @@ Macros</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="acee1a92194c2c04c113da0d3ee03b642" name="acee1a92194c2c04c113da0d3ee03b642"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acee1a92194c2c04c113da0d3ee03b642">&#9670;&nbsp;</a></span>dynarray_pushn</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define dynarray_pushn</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">A, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">p, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">n&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">    DYNARRAY_ASSERT(<span class="keyword">sizeof</span>(*(p)) == <span class="keyword">sizeof</span>(*(A)));                             \</div>
+<div class="line">    dynarray_ensure_empty((A), (n));                                           \</div>
+<div class="line">    DYNARRAY_MEMCPY((A) + <a class="code hl_define" href="dynarray_8h.html#ade1abcf1d60bf24b2e02737e6e9b7511">dynarray_len</a>(A), p, <span class="keyword">sizeof</span> *(p)*n);                  \</div>
+<div class="line">    dynarray_info(A)-&gt;length += n;</div>
+</div><!-- fragment -->
+<p>push n element starting at pointer p to dynamic array </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">A</td><td>dynamic array </td></tr>
+    <tr><td class="paramname">p</td><td>location of elements </td></tr>
+    <tr><td class="paramname">n</td><td>count of elements to push</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>sizeof type of element that p is pointing to <em><b>must</b></em> be equal to sizeof element of dynamic array, and n is count of elements, not total size, not bytes to copy </p>
 
 </div>
 </div>
@@ -540,7 +609,7 @@ Macros</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td>&#160;&#160;&#160;dynarray_growf((A), (n), sizeof(*(A)))</td>
+          <td></td><td>&#160;&#160;&#160;    (A = dynarray_growf_wrapper((A), (n), sizeof(*(A))))</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -578,7 +647,7 @@ Macros</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td>&#160;&#160;&#160;    ((A) = <a class="el" href="dynarray_8h.html#a7acbaf0697a61afd63e2bc5df575a497">dynarray_setcap</a>((A), (n)), <a class="el" href="dynarray_8h.html#a0da667355c9aa3ab9a816b74eddbb624">dynarray_info</a>(A)-&gt;length = (n), (A))</td>
+          <td></td><td>&#160;&#160;&#160;    (<a class="el" href="dynarray_8h.html#a7acbaf0697a61afd63e2bc5df575a497">dynarray_setcap</a>((A), (n)), <a class="el" href="dynarray_8h.html#a0da667355c9aa3ab9a816b74eddbb624">dynarray_info</a>(A)-&gt;length = (n), (A))</td>
         </tr>
       </table>
 </div><div class="memdoc">

@@ -102,6 +102,14 @@ Macros</h2></td></tr>
 <tr class="memitem:ae0bd46481b404d5364006133b59287eb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="log_8h.html#ae0bd46481b404d5364006133b59287eb">infoerr</a>(...)</td></tr>
 <tr class="memdesc:ae0bd46481b404d5364006133b59287eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">log at info level, print errno  <a href="log_8h.html#ae0bd46481b404d5364006133b59287eb">More...</a><br /></td></tr>
 <tr class="separator:ae0bd46481b404d5364006133b59287eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c9bd2d0b575ebac3670f89b0fc2e275"><td class="memItemLeft" align="right" valign="top"><a id="a3c9bd2d0b575ebac3670f89b0fc2e275" name="a3c9bd2d0b575ebac3670f89b0fc2e275"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>unimplemented</b>(...)&#160;&#160;&#160;__stderr_log(&quot;UNIMPLEMENTED&quot;, __FL__, __VA_ARGS__);</td></tr>
+<tr class="memdesc:a3c9bd2d0b575ebac3670f89b0fc2e275"><td class="mdescLeft">&#160;</td><td class="mdescRight">log unimplemented control flow <br /></td></tr>
+<tr class="separator:a3c9bd2d0b575ebac3670f89b0fc2e275"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab84932fe4bcd30f0108e0a527d20e7d9"><td class="memItemLeft" align="right" valign="top"><a id="ab84932fe4bcd30f0108e0a527d20e7d9" name="ab84932fe4bcd30f0108e0a527d20e7d9"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>unreachable</b>(...)&#160;&#160;&#160;__stderr_log(&quot;UNREACHABLE&quot;, __FL__, __VA_ARGS__);</td></tr>
+<tr class="memdesc:ab84932fe4bcd30f0108e0a527d20e7d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">log control flow that should be unreachable <br /></td></tr>
+<tr class="separator:ab84932fe4bcd30f0108e0a527d20e7d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
@@ -111,6 +119,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>__stderr_log</b> (con
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Logging functions. </p>
+<p ><a class="el" href="log_8h.html" title="Logging functions.">log.h</a> v0.0.1 simple logging library - sleepntsheep 2022 logging should be simple and easy, here you put in argument just as how you would printf it <a class="el" href="log_8h.html#a1445e207e36c97ff84c54b47288cea19" title="log at panic level and abort">panic(...)</a> : log at panic level and abort <a class="el" href="log_8h.html#a8224a361dddd2ad59b411982e5ea746f" title="log at warn level">warn(...)</a> : log at warn level <a class="el" href="log_8h.html#a6576e6f80131b01ef1bca232282ef26b" title="log at info level">info(...)</a> : log at info level the *err(...) counterpart of each function do the same thing except it call perror at the end causing error from errno to be printed too </p>
 </div><h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a6576e6f80131b01ef1bca232282ef26b" name="a6576e6f80131b01ef1bca232282ef26b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6576e6f80131b01ef1bca232282ef26b">&#9670;&nbsp;</a></span>info</h2>
@@ -127,9 +136,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>__stderr_log</b> (con
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">                        <span class="keywordflow">do</span> {  \</div>
-<div class="line">                        __stderr_log(<span class="stringliteral">&quot;INFO&quot;</span>, __FL__, __VA_ARGS__);     \</div>
-<div class="line">                    } <span class="keywordflow">while</span> (0)</div>
+<b>Value:</b><div class="fragment"><div class="line">    <span class="keywordflow">do</span> {                                                                       \</div>
+<div class="line">        __stderr_log(<span class="stringliteral">&quot;INFO&quot;</span>, __FL__, __VA_ARGS__);                             \</div>
+<div class="line">    } <span class="keywordflow">while</span> (0)</div>
 </div><!-- fragment -->
 <p>log at info level </p>
 
@@ -150,10 +159,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>__stderr_log</b> (con
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">                        <span class="keywordflow">do</span> {  \</div>
-<div class="line">                        __stderr_log(<span class="stringliteral">&quot;INFO&quot;</span>, __FL__, __VA_ARGS__);     \</div>
-<div class="line">                        perror(<span class="stringliteral">&quot;&quot;</span>);             \</div>
-<div class="line">                    } <span class="keywordflow">while</span> (0)</div>
+<b>Value:</b><div class="fragment"><div class="line">    <span class="keywordflow">do</span> {                                                                       \</div>
+<div class="line">        __stderr_log(<span class="stringliteral">&quot;INFO&quot;</span>, __FL__, __VA_ARGS__);                             \</div>
+<div class="line">        perror(<span class="stringliteral">&quot;&quot;</span>);                                                            \</div>
+<div class="line">    } <span class="keywordflow">while</span> (0)</div>
 </div><!-- fragment -->
 <p>log at info level, print errno </p>
 
@@ -174,10 +183,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>__stderr_log</b> (con
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">                        <span class="keywordflow">do</span> {  \</div>
-<div class="line">                        __stderr_log(<span class="stringliteral">&quot;PANIC&quot;</span>, __FL__, __VA_ARGS__);     \</div>
-<div class="line">                        exit(1);                \</div>
-<div class="line">                    } <span class="keywordflow">while</span> (0)</div>
+<b>Value:</b><div class="fragment"><div class="line">    <span class="keywordflow">do</span> {                                                                       \</div>
+<div class="line">        __stderr_log(<span class="stringliteral">&quot;PANIC&quot;</span>, __FL__, __VA_ARGS__);                            \</div>
+<div class="line">        exit(1);                                                               \</div>
+<div class="line">    } <span class="keywordflow">while</span> (0)</div>
 </div><!-- fragment -->
 <p>log at panic level and abort </p>
 
@@ -198,11 +207,11 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>__stderr_log</b> (con
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">                        <span class="keywordflow">do</span> {  \</div>
-<div class="line">                        __stderr_log(<span class="stringliteral">&quot;PANIC&quot;</span>, __FL__, __VA_ARGS__);     \</div>
-<div class="line">                        perror(<span class="stringliteral">&quot;&quot;</span>);             \</div>
-<div class="line">                        exit(1);                \</div>
-<div class="line">                    } <span class="keywordflow">while</span> (0)</div>
+<b>Value:</b><div class="fragment"><div class="line">    <span class="keywordflow">do</span> {                                                                       \</div>
+<div class="line">        __stderr_log(<span class="stringliteral">&quot;PANIC&quot;</span>, __FL__, __VA_ARGS__);                            \</div>
+<div class="line">        perror(<span class="stringliteral">&quot;&quot;</span>);                                                            \</div>
+<div class="line">        exit(1);                                                               \</div>
+<div class="line">    } <span class="keywordflow">while</span> (0)</div>
 </div><!-- fragment -->
 <p>log at panic level, print errno and abort </p>
 
@@ -223,9 +232,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>__stderr_log</b> (con
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">                        <span class="keywordflow">do</span> {  \</div>
-<div class="line">                        __stderr_log(<span class="stringliteral">&quot;WARN&quot;</span>, __FL__, __VA_ARGS__);     \</div>
-<div class="line">                    } <span class="keywordflow">while</span> (0)</div>
+<b>Value:</b><div class="fragment"><div class="line">    <span class="keywordflow">do</span> {                                                                       \</div>
+<div class="line">        __stderr_log(<span class="stringliteral">&quot;WARN&quot;</span>, __FL__, __VA_ARGS__);                             \</div>
+<div class="line">    } <span class="keywordflow">while</span> (0)</div>
 </div><!-- fragment -->
 <p>log at warn level </p>
 
@@ -246,10 +255,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>__stderr_log</b> (con
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">                        <span class="keywordflow">do</span> {  \</div>
-<div class="line">                        __stderr_log(<span class="stringliteral">&quot;WARN&quot;</span>, __FL__, __VA_ARGS__);     \</div>
-<div class="line">                        perror(<span class="stringliteral">&quot;&quot;</span>);             \</div>
-<div class="line">                    } <span class="keywordflow">while</span> (0)</div>
+<b>Value:</b><div class="fragment"><div class="line">    <span class="keywordflow">do</span> {                                                                       \</div>
+<div class="line">        __stderr_log(<span class="stringliteral">&quot;WARN&quot;</span>, __FL__, __VA_ARGS__);                             \</div>
+<div class="line">        perror(<span class="stringliteral">&quot;&quot;</span>);                                                            \</div>
+<div class="line">    } <span class="keywordflow">while</span> (0)</div>
 </div><!-- fragment -->
 <p>log at warn level, print errno </p>
 
