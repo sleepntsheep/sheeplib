@@ -314,14 +314,12 @@ static sjson_resultnum sjsonlexer_lexnumber(sjsonlexer *lexer) {
         char c = sjsonlexer_peek(lexer);
         if (!isdigit(c)) {
             if (c == '+' || c == '-') {
-                if (didsign) {
-                    goto bad;
-                }
+                if (didsign)
+                    return SJSON_ERR_INVALID_SOURCE;
                 didsign = true;
             } else if (c == '.') {
-                if (didpoint) {
-                    goto bad;
-                }
+                if (didpoint)
+                    return SJSON_ERR_INVALID_SOURCE;
                 didpoint = true;
             } else {
                 break;
@@ -337,8 +335,6 @@ static sjson_resultnum sjsonlexer_lexnumber(sjsonlexer *lexer) {
     sjsonlexer_pushtok(lexer, SJSON_TKNUMBERLITERAL, buf.buf, lexer->c);
 
     return SJSON_SUCCESS;
-bad:
-    return SJSON_ERR_INVALID_SOURCE;
 }
 
 static sjson_resultnum sjsonlexer_lexstring(sjsonlexer *lexer) {
@@ -583,13 +579,12 @@ static sjson_result sjson_parsearray(sjsontokarr *toks) {
         else
             sjson_addchild(arr.json, child.json);
         sjsontok next = sjsontokarr_peek(toks);
-        if (next.type == SJSON_TKCOMMA) {
+        if (next.type == SJSON_TKCOMMA)
             sjsontokarr_advance(toks);
-        } else if (next.type != SJSON_TKRSQUAREBRACKET) {
+        else if (next.type != SJSON_TKRSQUAREBRACKET)
             return (sjson_result){
                 .err = SJSON_ERR_NO_TERMINATING_BRACKET,
             };
-        }
     }
     return arr;
 }
@@ -608,28 +603,26 @@ sjson_result sjson_parse(sjsontokarr *toks) {
         break;
     case SJSON_TKLBRACE:
         ret = sjson_parseobject(toks);
-        if (ret.err) {
+        if (ret.err)
             return ret;
-        }
         break;
     case SJSON_TKLSQUAREBRACKET:
         ret = sjson_parsearray(toks);
-        if (ret.err) {
+        if (ret.err)
             return ret;
-        }
         break;
     case SJSON_TKNUMBERLITERAL:
         ret = sjson_new(SJSON_NUMBER);
-        if (ret.err) {
+        if (ret.err)
             return ret;
-        }
+        /* TODOOOOOO: stop using strtod as it only support base 10 and base 16,
+            ideally this should support 0o (octal) and 0b (binary) too */
         ret.json->v.num = strtod(sjsontokarr_peek(toks).start, NULL);
         break;
     case SJSON_TKSTRINGLITERAL:
         ret = sjson_new(SJSON_STRING);
-        if (ret.err) {
+        if (ret.err)
             return ret;
-        }
         ret.json->v.str = sjsontokarr_peek(toks).start;
         break;
     default:
@@ -680,32 +673,26 @@ sjson_resultnum sjson_deletechild(sjson *json, sjson *child) {
 }
 
 sjson_result sjson_object_get(sjson *json, char *key) {
-    if (json->type != SJSON_OBJECT) {
+    if (json->type != SJSON_OBJECT)
         return (sjson_result){.err = SJSON_ERR_WRONG_TYPE};
-    }
-    sjson_foreach(json, iter) {
-        if (!strcmp(iter->key, key)) {
-            return (sjson_result){.json = iter};
-        }
-    }
+    sjson_foreach(json, iter) if (!strcmp(iter->key, key)) return (
+        sjson_result){.json = iter};
     return (sjson_result){
         .err = SJSON_ERR_NO_MATCHING_MEMBER,
     };
 }
 
 sjson_resultnum sjson_object_delete_all(sjson *json, char *key) {
-    if (json->type != SJSON_OBJECT) {
+    if (json->type != SJSON_OBJECT)
         return SJSON_ERR_WRONG_TYPE;
-    }
     sjson_foreach(json, iter) if (!strcmp(iter->key, key))
         sjson_deletechild(json, iter);
     return SJSON_SUCCESS;
 }
 
 sjson_resultnum sjson_object_set(sjson *json, char *key, sjson *value) {
-    if (json->type != SJSON_OBJECT) {
+    if (json->type != SJSON_OBJECT)
         return SJSON_ERR_WRONG_TYPE;
-    }
     sjson_object_delete_all(json, key);
     value->key = key;
     sjson_addchild(json, value);
@@ -713,9 +700,8 @@ sjson_resultnum sjson_object_set(sjson *json, char *key, sjson *value) {
 }
 
 sjson_resultnum sjson_addchild(sjson *json, sjson *child) {
-    if (json->type != SJSON_OBJECT && json->type != SJSON_ARRAY) {
+    if (json->type != SJSON_OBJECT && json->type != SJSON_ARRAY)
         return SJSON_ERR_WRONG_TYPE;
-    }
     if (json->v.tail == NULL && json->v.child == NULL) {
         json->v.tail = json->v.child = child;
     } else {
