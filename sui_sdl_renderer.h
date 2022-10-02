@@ -1,21 +1,31 @@
 #ifndef SUI_SDL_RENDERER_H_
 #define SUI_SDL_RENDERER_H_
 
-#include "sui.h"
+#include "../sui.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
 static SDL_Renderer *sui_sdl_renderer;
 static TTF_Font *sui_sdl_font;
 
+void sui_sdl_init_ctx(sui_ctx *ctx);
 void sui_sdl_start_event();
 void sui_sdl_handle_event(sui_ctx *ctx, SDL_Event ev);
 void sui_sdl_end_event();
 void sui_sdl_init(SDL_Renderer *renderer, TTF_Font *font);
+void sui_sdl_get_text_size(const char *text, int *w, int *h);
+void sui_sdl_draw_rect(sui_ctx *ctx, int x, int y, int w, int h);
+void sui_sdl_draw_text(sui_ctx *ctx, const char *text, int x, int y);
 
 #endif /* SUI_SDL_RENDERER_H_ */
 
 #ifdef SUI_SDL_RENDERER_IMPLEMENTATION
+
+void sui_sdl_init_ctx(sui_ctx *ctx) {
+    ctx->draw_rect = sui_sdl_draw_rect;
+    ctx->draw_text = sui_sdl_draw_text;
+    ctx->get_text_size = sui_sdl_get_text_size;
+}
 
 void sui_sdl_start_event() {}
 void sui_sdl_end_event() {}
@@ -25,13 +35,13 @@ void sui_sdl_init(SDL_Renderer *renderer, TTF_Font *font) {
     sui_sdl_font = font;
 }
 
-void sui_draw_rect(sui_ctx *ctx, int x, int y, int w, int h) {
+void sui_sdl_draw_rect(sui_ctx *ctx, int x, int y, int w, int h) {
     SDL_SetRenderDrawColor(sui_sdl_renderer, ctx->style.bg.r, ctx->style.bg.g, ctx->style.bg.b, ctx->style.bg.a);
     SDL_Rect rect = {x, y, w, h};
     SDL_RenderFillRect(sui_sdl_renderer, &rect);
 }
 
-void sui_draw_text(sui_ctx *ctx, const char *text, int x, int y) {
+void sui_sdl_draw_text(sui_ctx *ctx, const char *text, int x, int y) {
     SDL_Color color = {ctx->style.fg.r, ctx->style.fg.g, ctx->style.fg.b, ctx->style.fg.a};
     SDL_Surface *surface = TTF_RenderText_Solid(sui_sdl_font, text, color);
     SDL_Texture *texture = SDL_CreateTextureFromSurface(sui_sdl_renderer, surface);
@@ -56,7 +66,7 @@ void sui_sdl_handle_event(sui_ctx *ctx, SDL_Event ev) {
     }
 }
 
-void sui_get_text_size(const char *text, int *w, int *h) {
+void sui_sdl_get_text_size(const char *text, int *w, int *h) {
     TTF_SizeText(sui_sdl_font, text, w, h);
 }
 

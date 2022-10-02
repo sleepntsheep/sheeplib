@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include <string.h>
 const char *amogus = "ඞ";
-const char *amogus2 = "\x0D\x9E";
+const char *amogus3 = "\x0D\x9E";
 
 int main() {
     printf("%d\n", strcmp(amogus, amogus2));
