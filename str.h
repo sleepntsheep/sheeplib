@@ -196,7 +196,8 @@ struct str str_substr(struct str str, size_t start, size_t end) {
      * to implement too much thing like printf replacement */
     struct str substring = {
         .b = 0,
-        .c = end - start + 2.l = end - start + 1,
+        .c = end - start + 2,
+        .l = end - start + 1,
     };
     str_resize(&substring, substring.c);
     strncpy(substring.b, str.b + start, substring.l);
