@@ -217,18 +217,6 @@ sjson_resultnum sjson_deletechild(sjson *json, sjson *child);
  */
 #define sjson_array_push sjson_addchild
 
-/**
- * @brief register logger function to sjson
- */
-void sjson_register_logger(int (*logger)(const char *, ...));
-
-static int sjson_logger_dummy(const char *fmt, ...) {
-    (void)fmt;
-    return 0;
-}
-
-static int (*logger)(const char *, ...) = sjson_logger_dummy;
-
 #endif /* SHEEP_SJSON_H */
 
 #ifdef SHEEP_SJSON_IMPLEMENTATION
@@ -281,10 +269,6 @@ static void sjsonbuf_push(sjsonbuf *buf, const void *s, size_t len) {
     memcpy(buf->buf + buf->len, s, len);
     buf->len += len;
     buf->buf[buf->len] = '\x0';
-}
-
-void sjson_register_logger(int (*newlogger)(const char *, ...)) {
-    logger = newlogger;
 }
 
 static char sjsonlexer_advance(sjsonlexer *lexer) {
@@ -384,24 +368,11 @@ static sjson_resultnum sjsonlexer_lexstring(sjsonlexer *lexer) {
             case '/':
                 sjsonbuf_push(&buf, "/", 1);
                 break;
+                /*
             case 'u': {
-                char utf[2] = {0};
-                /* check if 4 hex following */
-                if (lexer->c + 3 >= stringend)
-                    return SJSON_ERR_INVALID_ESCAPE_SEQUENCE;
-                for (int i = 0; i < 4; i++) {
-                    char hex = sjsonlexer_advance(lexer);
-                    utf[i / 2] *= 0x10;
-                    if (hex >= 'A' && hex <= 'F')
-                        utf[i / 2] += hex - 'A' + 10;
-                    else if (hex >= '0' && hex <= 'F')
-                        utf[i / 2] += hex - '0';
-                    else
-                        return SJSON_ERR_INVALID_ESCAPE_SEQUENCE;
-                }
-                sjsonbuf_push(&buf, utf, 2);
                 break;
             }
+            */
             default:
                 break;
             }
@@ -499,7 +470,6 @@ sjson_resultnum sjsonlexer_lex(sjsonlexer *lexer) {
         case '\n':
             break;
         default:
-            logger("unknown char");
             break;
         }
         sjsonlexer_advance(lexer);
@@ -626,8 +596,6 @@ sjson_result sjson_parse(sjsontokarr *toks) {
         ret.json->v.str = sjsontokarr_peek(toks).start;
         break;
     default:
-        logger("parse: unknown token %s %s", sjson_token_names,
-               sjsontokarr_peek(toks).type, sjsontokarr_peek(toks).start);
         return (sjson_result){
             .err = SJSON_ERR_UNKNOWN_TOKEN,
         };

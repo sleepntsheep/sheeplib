@@ -339,7 +339,6 @@ describe(algo) {
 describe(json) {
 
     char *dup;
-    sjson_register_logger(printf);
 
     it("parse null") {
         sjson_result r = sjson_deserialize("null", 4);
@@ -446,8 +445,8 @@ describe(json) {
     }
 
     it("parse escape code \\u unicode") {
-        char *strs[] = {"\"\\u3FA3\"", "\"\\u4712\""};
-        char *ans[] = {"\x3f\xa3", "\x47\x12"};
+        char *strs[] = {"\"\\u3FA3\"", "\"\\u4712\"", "\"\\u0D9E\""};
+        char *ans[] = {"\x3f\xa3", "\x47\x12", "ඞ"};
         for (int i = 0; i < sizeof strs / sizeof *strs; i++) {
             sjson_result r = sjson_deserialize(strs[i], strlen(strs[i]));
             asserteq_str(sjson_err_names[r.err], "SJSON_SUCCESS");
@@ -458,8 +457,8 @@ describe(json) {
     }
 
     it("parse utf8") {
-        char *strs[] = {"\"💀sdjoiad\"", "\"🥴🥴\""};
-        char *ans[] = {"💀sdjoiad", "🥴🥴"};
+        char *strs[] = {"\"💀sdjoiad\"", "\"🥴🥴ඞ\""};
+        char *ans[] = {"💀sdjoiad", "🥴🥴ඞ"};
         for (int i = 0; i < sizeof strs / sizeof *strs; i++) {
             sjson_result r = sjson_deserialize(strs[i], strlen(strs[i]));
             asserteq_str(sjson_err_names[r.err], "SJSON_SUCCESS");
