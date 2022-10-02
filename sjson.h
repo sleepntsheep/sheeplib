@@ -2,12 +2,14 @@
  * @file sjson.h
  * @brief Simple json parser
  *
- * next and prev is used for doubly linked list in object and array
- * no hashmap is used here, doubly linked list is more simple, despite being
- * O(n) lookup childvalue store the doubly linked list of all child, if type is
- * object or array tail store last child, this is used for sjson_addchild
- * function to be O(1) stringvalue store string if type is string numbervalue
- * store double number if type is number
+ * Usage: take a look at `struct sjson`, it represents a json value
+ * Notes: object and array children are stored as linked list,
+ *        this is for simplicity and predictable memory usage
+ *        if you are going to do a lot of children lookup,
+ *        you should iterate over them yourself or use different library
+ *
+ * Example:
+ *        look at test/test.c, describe(json)
  *
  * v0.0.3 - sleepntsheep 2022
  */
