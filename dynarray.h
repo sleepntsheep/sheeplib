@@ -91,8 +91,8 @@ extern "C" {
 #endif /* DYNARRAY_ASSERT */
 
 struct _dynarray_info {
-    long length;   /* dynamic array length */
-    long capacity; /* dynamic array capacity */
+    size_t length;   /* dynamic array length */
+    size_t capacity; /* dynamic array capacity */
 };
 
 #define DYNARRAY_MIN_CAPACITY 4
@@ -114,8 +114,8 @@ struct _dynarray_info {
 
 #endif /* SHEEP_DYNARRAY_NOSHORTHAND */
 
-static void *dynarray_growf(void *a, long cap, long membsize);
-static long dynarray_first_2n_bigger_than(long x);
+static void *dynarray_growf(void *a, size_t cap, size_t membsize);
+static size_t dynarray_first_2n_bigger_than(size_t x);
 
 #ifdef __cplusplus
 }
@@ -125,7 +125,7 @@ static long dynarray_first_2n_bigger_than(long x);
 /* C++ is bad and don't have implicit pointer conversion so we're stuck with
  * this */
 template <class T>
-static T *dynarray_growf_wrapper(T *a, long cap, long membsize) {
+static T *dynarray_growf_wrapper(T *a, size_t cap, size_t membsize) {
     return (T *)dynarray_growf(a, cap, membsize);
 }
 #else
@@ -186,7 +186,7 @@ static T *dynarray_growf_wrapper(T *a, long cap, long membsize) {
 #define dynarray_ins(A, idx, x)                                                \
     do {                                                                       \
         dynarray_ensure_empty((A), 1);                                         \
-        for (long i = idx; i <= dynarray_len(A); i++)                          \
+        for (size_t i = idx; i <= dynarray_len(A); i++)                        \
             (A)[i + 1] = (A)[i];                                               \
         (A)[idx] = (x);                                                        \
         dynarray_info(A)->length++;                                            \
@@ -199,7 +199,7 @@ static T *dynarray_growf_wrapper(T *a, long cap, long membsize) {
  */
 #define dynarray_del(A, idx)                                                   \
     do {                                                                       \
-        for (long i = idx; i < dynarray_len(A) - 1; i++)                       \
+        for (size_t i = idx; i < dynarray_len(A) - 1; i++)                     \
             A[i] = A[i + 1];                                                   \
         dynarray_info(A)->length--;                                            \
     } while (0)
@@ -210,13 +210,13 @@ static T *dynarray_growf_wrapper(T *a, long cap, long membsize) {
 /**
  * @brief return length of dynamic array
  * @param A dynamic array
- * @return length of dynamic array (long)
+ * @return length of dynamic array (size_t)
  */
 #define dynarray_len(A) ((A) ? dynarray_info(A)->length : 0)
 /**
  * @brief return capacity of dynamic array
  * @param A dynamic array
- * @return capacity of dynamic array (long)
+ * @return capacity of dynamic array (size_t)
  */
 #define dynarray_cap(A)                                                        \
     ((A) ? dynarray_info(A)->capacity : DYNARRAY_MIN_CAPACITY)
@@ -235,7 +235,7 @@ static T *dynarray_growf_wrapper(T *a, long cap, long membsize) {
  * @return pointer to dynamic array (might be moved by realloc)
  */
 #define dynarray_setlen(A, n)                                                  \
-    (dynarray_setcap((A), (n)), dynarray_info(A)->length = (n), (A))
+    (dynarray_setcap((A), (n)), dynarray_info(A)->length = (n))
 /**
  * @brief push n element starting at pointer p to dynamic array
  * @param A dynamic array
@@ -256,7 +256,7 @@ static T *dynarray_growf_wrapper(T *a, long cap, long membsize) {
 
 #ifdef SHEEP_DYNARRAY_IMPLEMENTATION
 
-static void *dynarray_growf(void *a, long cap, long membsize) {
+static void *dynarray_growf(void *a, size_t cap, size_t membsize) {
     if (a == NULL) {
         a = ((struct _dynarray_info *)DYNARRAY_MALLOC(
                 sizeof(struct _dynarray_info) +
@@ -275,8 +275,8 @@ static void *dynarray_growf(void *a, long cap, long membsize) {
     return b;
 }
 
-static long dynarray_first_2n_bigger_than(long x) {
-    long ret = 1;
+static size_t dynarray_first_2n_bigger_than(size_t x) {
+    size_t ret = 1;
     while (ret < x)
         ret <<= 1;
     return ret;
