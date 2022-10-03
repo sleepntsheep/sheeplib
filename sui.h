@@ -1,8 +1,3 @@
-/* @file sui.h
- * @brief intermediate ui library
- *
- *
- */
 #ifndef SUI_H_
 #define SUI_H_
 
@@ -19,10 +14,10 @@
 
 typedef struct {
     uint8_t r, g, b, a;
-} sdl_rgba;
+} sui_rgba;
 
 typedef struct {
-    sdl_rgba bg, fg;
+    sui_rgba bg, bg2, fg, fg2;
     int btn_pad;
 } sui_style;
 
@@ -40,14 +35,16 @@ struct sui_ctx_s {
     int mouse_pressed; /* mouse_button OR'd together */
     int mouse_x, mouse_y;
     sui_style style;
-    void (*draw_rect)(sui_ctx *, int, int, int, int);
-    void (*draw_text)(sui_ctx *, const char *text, int, int);
+    void (*draw_rect)(sui_ctx *, int, int, int, int, sui_rgba);
+    void (*draw_text)(sui_ctx *, const char *text, int, int, sui_rgba);
     void (*get_text_size)(const char *text, int *w, int *h);
 };
 
 static const sui_style sui_style_default = {
     .bg = {0xff, 0xff, 0xff, 0xff},
+    .bg2 = {0xaa, 0xaa, 0xaa, 0xff},
     .fg = {0x00, 0x00, 0x00, 0xff},
+    .fg2 = {0x00, 0xff, 0x00, 0xff},
     .btn_pad = 20,
 };
 
@@ -55,6 +52,8 @@ void sui_ctx_init(sui_ctx *ctx);
 bool sui_btn(sui_ctx *ctx, const char *label, int x, int y, int id);
 void sui_text(sui_ctx *ctx, const char *label, int x, int y);
 inline bool sui_intersect(int x, int y, int w, int h, int mx, int my);
+bool sui_slider_float(sui_ctx *ctx, float vmin, float *value, float vmax, int x,
+                      int y, int w, int h);
 
 #endif /* SUI_H_ */
 
@@ -77,8 +76,8 @@ bool sui_btn(sui_ctx *ctx, const char *label, int x, int y, int id) {
     h += 2 * ctx->style.btn_pad;
     int tx = x + ctx->style.btn_pad;
     int ty = y + ctx->style.btn_pad;
-    ctx->draw_rect(ctx, x, y, w, h);
-    ctx->draw_text(ctx, label, tx, ty);
+    ctx->draw_rect(ctx, x, y, w, h, ctx->style.bg);
+    ctx->draw_text(ctx, label, tx, ty, ctx->style.fg);
     if (!ctx->mouse_pressed) {
         ctx->selected_id = -1;
         return false;
@@ -90,9 +89,23 @@ bool sui_btn(sui_ctx *ctx, const char *label, int x, int y, int id) {
     if (sui_intersect(x, y, w, h, ctx->mouse_x, ctx->mouse_y)) {
         ctx->selected_id = id;
         return true;
-    } else {
-        return false;
     }
+    return false;
+}
+
+bool sui_slider_float(sui_ctx *ctx, float vmin, float *value, float vmax, int x,
+                      int y, int w, int h) {
+    float percent = *value / (vmax - vmin);
+    int offset = percent * w;
+    ctx->draw_rect(ctx, x, y, w, h, ctx->style.fg2);
+    ctx->draw_rect(ctx, x + offset, y, w - offset, h, ctx->style.bg2);
+    if (!ctx->mouse_pressed)
+        return false;
+    if (sui_intersect(x, y, w, h, ctx->mouse_x, ctx->mouse_y)) {
+        *value = (vmax - vmin) * (float)(ctx->mouse_x - x) / w;
+        return true;
+    }
+    return false;
 }
 
 void sui_text(sui_ctx *ctx, const char *label, int x, int y) {
@@ -102,8 +115,8 @@ void sui_text(sui_ctx *ctx, const char *label, int x, int y) {
     h += 2 * ctx->style.btn_pad;
     int tx = x + ctx->style.btn_pad;
     int ty = y + ctx->style.btn_pad;
-    ctx->draw_rect(ctx, x, y, w, h);
-    ctx->draw_text(ctx, label, tx, ty);
+    ctx->draw_rect(ctx, x, y, w, h, ctx->style.bg);
+    ctx->draw_text(ctx, label, tx, ty, ctx->style.fg);
 }
 
 #undef SUI_IMPLEMENTATION
