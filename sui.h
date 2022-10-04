@@ -45,15 +45,23 @@ static const sui_style sui_style_default = {
     .bg2 = {0xaa, 0xaa, 0xaa, 0xff},
     .fg = {0x00, 0x00, 0x00, 0xff},
     .fg2 = {0x00, 0xff, 0x00, 0xff},
-    .btn_pad = 20,
+    .btn_pad = 5,
 };
 
 void sui_ctx_init(sui_ctx *ctx);
 bool sui_btn(sui_ctx *ctx, const char *label, int x, int y, int id);
 void sui_text(sui_ctx *ctx, const char *label, int x, int y);
 inline bool sui_intersect(int x, int y, int w, int h, int mx, int my);
-bool sui_slider_float(sui_ctx *ctx, float vmin, float *value, float vmax, int x,
-                      int y, int w, int h);
+bool sui_slider_double(sui_ctx *ctx, double vmin, double *value, double vmax,
+                       int x, int y, int w, int h);
+bool sui_slider_label_double(sui_ctx *ctx, const char *label, double vmin,
+                             double *value, double vmax, int x, int y, int w);
+bool sui_slider_int(sui_ctx *ctx, int vmin, int *value, int vmax, int x, int y,
+                    int w, int h);
+bool sui_slider_label_int(sui_ctx *ctx, const char *label, int vmin, int *value,
+                          int vmax, int x, int y, int w);
+bool sui_checkbox_label(sui_ctx *ctx, bool value, const char *label, int x,
+                        int y, int id);
 
 #endif /* SUI_H_ */
 
@@ -93,19 +101,72 @@ bool sui_btn(sui_ctx *ctx, const char *label, int x, int y, int id) {
     return false;
 }
 
-bool sui_slider_float(sui_ctx *ctx, float vmin, float *value, float vmax, int x,
-                      int y, int w, int h) {
-    float percent = *value / (vmax - vmin);
+bool sui_slider_double(sui_ctx *ctx, double vmin, double *value, double vmax,
+                       int x, int y, int w, int h) {
+    double percent = *value / (vmax - vmin);
     int offset = percent * w;
     ctx->draw_rect(ctx, x, y, w, h, ctx->style.fg2);
     ctx->draw_rect(ctx, x + offset, y, w - offset, h, ctx->style.bg2);
     if (!ctx->mouse_pressed)
         return false;
     if (sui_intersect(x, y, w, h, ctx->mouse_x, ctx->mouse_y)) {
-        *value = (vmax - vmin) * (float)(ctx->mouse_x - x) / w;
+        *value = (vmax - vmin) * (double)(ctx->mouse_x - x) / w;
         return true;
     }
     return false;
+}
+
+bool sui_slider_label_double(sui_ctx *ctx, const char *label, double vmin,
+                             double *value, double vmax, int x, int y, int w) {
+    int tw, h;
+    ctx->get_text_size(label, &tw, &h);
+    bool result = sui_slider_double(ctx, vmin, value, vmax, x, y, w, h);
+    ctx->draw_text(ctx, label, x + (w - tw) / 2, y, ctx->style.fg);
+    return result;
+}
+
+bool sui_slider_int(sui_ctx *ctx, int vmin, int *value, int vmax, int x, int y,
+                    int w, int h) {
+    double percent = (double)*value / (vmax - vmin);
+    int offset = percent * w;
+    ctx->draw_rect(ctx, x, y, w, h, ctx->style.fg2);
+    ctx->draw_rect(ctx, x + offset, y, w - offset, h, ctx->style.bg2);
+    if (!ctx->mouse_pressed)
+        return false;
+    if (sui_intersect(x, y, w, h, ctx->mouse_x, ctx->mouse_y)) {
+        *value = round((vmax - vmin) * (double)(ctx->mouse_x - x) / w);
+        return true;
+    }
+    return false;
+}
+
+bool sui_slider_label_int(sui_ctx *ctx, const char *label, int vmin, int *value,
+                          int vmax, int x, int y, int w) {
+    int tw, h;
+    ctx->get_text_size(label, &tw, &h);
+    bool result = sui_slider_int(ctx, vmin, value, vmax, x, y, w, h);
+    ctx->draw_text(ctx, label, x + (w - tw) / 2, y, ctx->style.fg);
+    return result;
+}
+
+bool sui_checkbox_label(sui_ctx *ctx, bool value, const char *label, int x,
+                        int y, int id) {
+    int size;
+    ctx->get_text_size(label, NULL, &size);
+    ctx->draw_rect(ctx, x, y, size, size,
+                   value ? ctx->style.fg2 : ctx->style.bg2);
+    ctx->draw_text(ctx, label, x + size, y, ctx->style.fg2);
+    if (!ctx->mouse_pressed) {
+        ctx->selected_id = -1;
+        return value;
+    }
+    if (ctx->selected_id == id)
+        return value;
+    if (sui_intersect(x, y, size, size, ctx->mouse_x, ctx->mouse_y)) {
+        ctx->selected_id = id;
+        return !value;
+    }
+    return value;
 }
 
 void sui_text(sui_ctx *ctx, const char *label, int x, int y) {
