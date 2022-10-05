@@ -60,8 +60,6 @@
 extern "C" {
 #endif
 
-#pragma once
-
 #ifndef SHEEP_DYNARRAY_H
 #define SHEEP_DYNARRAY_H
 
@@ -114,8 +112,8 @@ struct _dynarray_info {
 
 #endif /* SHEEP_DYNARRAY_NOSHORTHAND */
 
-static void *dynarray_growf(void *a, size_t cap, size_t membsize);
-static size_t dynarray_first_2n_bigger_than(size_t x);
+void *dynarray_growf(void *a, size_t cap, size_t membsize);
+size_t dynarray_first_2n_bigger_than(size_t x);
 
 #ifdef __cplusplus
 }
@@ -125,7 +123,7 @@ static size_t dynarray_first_2n_bigger_than(size_t x);
 /* C++ is bad and don't have implicit pointer conversion so we're stuck with
  * this */
 template <class T>
-static T *dynarray_growf_wrapper(T *a, size_t cap, size_t membsize) {
+T *dynarray_growf_wrapper(T *a, size_t cap, size_t membsize) {
     return (T *)dynarray_growf(a, cap, membsize);
 }
 #else
@@ -256,7 +254,7 @@ static T *dynarray_growf_wrapper(T *a, size_t cap, size_t membsize) {
 
 #ifdef SHEEP_DYNARRAY_IMPLEMENTATION
 
-static void *dynarray_growf(void *a, size_t cap, size_t membsize) {
+void *dynarray_growf(void *a, size_t cap, size_t membsize) {
     if (a == NULL) {
         a = ((struct _dynarray_info *)DYNARRAY_MALLOC(
                 sizeof(struct _dynarray_info) +
@@ -275,7 +273,7 @@ static void *dynarray_growf(void *a, size_t cap, size_t membsize) {
     return b;
 }
 
-static size_t dynarray_first_2n_bigger_than(size_t x) {
+size_t dynarray_first_2n_bigger_than(size_t x) {
     size_t ret = 1;
     while (ret < x)
         ret <<= 1;

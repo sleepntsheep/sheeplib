@@ -5,4 +5,3 @@ build: test/test.c
 
 run: test/bin
 	./test/bin
-
