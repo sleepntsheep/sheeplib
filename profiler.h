@@ -51,7 +51,7 @@ void profiler_stop(struct profiler *profiler, const char *name);
 #include <stdlib.h>
 #include <stdio.h>
 
-char *_profiler_strdup(const char *s)
+static char *_profiler_strdup(const char *s)
 {
     size_t len = strlen(s);
     char *ret = malloc(len + 1);
@@ -61,7 +61,6 @@ char *_profiler_strdup(const char *s)
     return ret;
 }
 
-
 #define profiler_foreach(iter, counter, profiler, block) \
     for (size_t counter = 0; counter < (profiler)->len; counter++) \
     { \
@@ -69,18 +68,18 @@ char *_profiler_strdup(const char *s)
         block \
     }
 
-void _profile_start(struct profile *profile)
+static void _profile_start(struct profile *profile)
 {
     profile->start = clock();
 }
 
-void _profile_stop(struct profile *profile)
+static void _profile_stop(struct profile *profile)
 {
     profile->total += clock() - profile->start;
     profile->start = 0L;
 }
 
-struct profile *_profiler_find(struct profiler *profiler, const char *name)
+static struct profile *_profiler_find(struct profiler *profiler, const char *name)
 {
     struct profile *target = NULL;
     profiler_foreach(prof, i, profiler, {
@@ -92,7 +91,7 @@ struct profile *_profiler_find(struct profiler *profiler, const char *name)
     return target;
 }
 
-struct profile *_profiler_find_create(struct profiler *profiler, const char *name)
+static struct profile *_profiler_find_create(struct profiler *profiler, const char *name)
 {
     if (profiler->profiles == NULL)
     {
