@@ -22,13 +22,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define __FL__ __FILE__, __LINE__
 /**
  * @brief log at panic level and abort
  */
 #define panic(...)                                                             \
     do {                                                                       \
-        __stderr_log("PANIC", __FL__, __VA_ARGS__);                            \
+        __stderr_log("PANIC", __FILE__, __LINE__, __VA_ARGS__);                            \
         exit(1);                                                               \
     } while (0)
 /**
@@ -36,7 +35,7 @@
  */
 #define panicerr(...)                                                          \
     do {                                                                       \
-        __stderr_log("PANIC", __FL__, __VA_ARGS__);                            \
+        __stderr_log("PANIC", __FILE__, __LINE__, __VA_ARGS__);                            \
         perror("");                                                            \
         exit(1);                                                               \
     } while (0)
@@ -45,14 +44,14 @@
  */
 #define warn(...)                                                              \
     do {                                                                       \
-        __stderr_log("WARN", __FL__, __VA_ARGS__);                             \
+        __stderr_log("WARN", __FILE__, __LINE__, __VA_ARGS__);                             \
     } while (0)
 /**
  * @brief log at warn level, print errno
  */
 #define warnerr(...)                                                           \
     do {                                                                       \
-        __stderr_log("WARN", __FL__, __VA_ARGS__);                             \
+        __stderr_log("WARN", __FILE__, __LINE__, __VA_ARGS__);                             \
         perror("");                                                            \
     } while (0)
 /**
@@ -60,24 +59,24 @@
  */
 #define info(...)                                                              \
     do {                                                                       \
-        __stderr_log("INFO", __FL__, __VA_ARGS__);                             \
+        __stderr_log("INFO", __FILE__, __LINE__, __VA_ARGS__);                             \
     } while (0)
 /**
  * @brief log at info level, print errno
  */
 #define infoerr(...)                                                           \
     do {                                                                       \
-        __stderr_log("INFO", __FL__, __VA_ARGS__);                             \
+        __stderr_log("INFO", __FILE__, __LINE__, __VA_ARGS__);                             \
         perror("");                                                            \
     } while (0)
 /**
  * @brief log unimplemented control flow
  */
-#define unimplemented(...) __stderr_log("UNIMPLEMENTED", __FL__, __VA_ARGS__);
+#define unimplemented(...) __stderr_log("UNIMPLEMENTED", __FILE__, __LINE__, __VA_ARGS__);
 /**
  * @brief log control flow that should be unreachable
  */
-#define unreachable(...) __stderr_log("UNREACHABLE", __FL__, __VA_ARGS__);
+#define unreachable(...) __stderr_log("UNREACHABLE", __FILE__, __LINE__, __VA_ARGS__);
 
 void __stderr_log(const char *type, const char *file, const int line,
                   const char *fmt, ...);
