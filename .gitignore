@@ -6,3 +6,5 @@ a.out
 sbi.h
 list.h
 spool.h
+local
+djtstd.h

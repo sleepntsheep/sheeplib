@@ -8,6 +8,7 @@
 #ifndef SHEEP_FMT_H
 #define SHEEP_FMT_H
 
+#include <stdbool.h>
 #include <stdio.h>
 
 #ifndef ffmt
@@ -18,6 +19,8 @@ typedef void (*fmt_callback)(FILE *, const void *const arg);
 
 void fmt_register(const char *, fmt_callback);
 void ffmt(FILE *out, const char *, ...);
+void fmt_set_flush(bool set);
+
 
 #endif /* SHEEP_FMT_H */
 
@@ -26,17 +29,23 @@ void ffmt(FILE *out, const char *, ...);
 #include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 static struct {
     const char *k;
     fmt_callback f;
     size_t l;
-}* custom_fmts = NULL;
+} *custom_fmts = NULL;
 static size_t custom_fmts_p = 0;
+static bool fmt_flush = false;
+
+void fmt_set_flush(bool set) {
+    fmt_flush = set;
+}
 
 void fmt_register(const char *key, fmt_callback callback) {
     if (custom_fmts == NULL) custom_fmts = malloc(sizeof *custom_fmts);
-    else custom_fmts = realloc(custom_fmts, sizeof *custom_fmts + (custom_fmts_p + 1));
+    else custom_fmts = realloc(custom_fmts, sizeof *custom_fmts * (custom_fmts_p + 1));
     custom_fmts[custom_fmts_p].k = key;
     custom_fmts[custom_fmts_p].f = callback;
     custom_fmts[custom_fmts_p].l = strlen(key);
@@ -46,10 +55,10 @@ void fmt_register(const char *key, fmt_callback callback) {
 void ffmt(FILE *out, const char *fstr, ...) {
     va_list argptr;
     va_start(argptr, fstr);
-
     const char *f = fstr;
     while (*f) {
         if (*f != '{' || strchr(f, '}') == NULL) {
+            /* could be faster, but IO bottleneck it anyway so who care */
             fputc(*f, out);
             f++;
         } else {
@@ -113,8 +122,8 @@ void ffmt(FILE *out, const char *fstr, ...) {
             }
         }
     }
-
     va_end(argptr);
+    if (fmt_flush) fflush(out);
 }
 
 #endif /* SHEEP_FMT_IMPLEMENTATION */

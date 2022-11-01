@@ -27,5 +27,7 @@ int main() {
     fmt("float: {float}\n", 1.0f/0.0f);
     fmt("longdouble: {longdouble}\n", 12349123471234781279834798127089573289450320745890237984705892739845082379457297305273457.0L);
     fmt("Pointer: {ptr}\n", &a);
+    fmt("Wrongfmt: {int }\n");
+    fmt("Wrongfmt2: {help}\n");
 }
 
