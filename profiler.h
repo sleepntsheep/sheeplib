@@ -3,20 +3,21 @@
  *
  * Usage:
  *
- *  // make a context (must be zero-initialized)
- *  struct profiler pf = { 0 };
+ *  // make a context (opaque pointer)
+ *  Profiler *p = profiler_new();
  *
- *  profiler_start(&pf, "IO Op");
+ *  profiler_start(p, "IO Op");
  *  FILE *fp = fopen("/dev/null", "w");
  *  fprintf(fp, "Profiler!");
  *  fclose(fp);
- *  profiler_stop(&pf, "IO Op");
- *  
- *  // print profiled data
+ *  profiler_stop(p, "IO Op");
  *
+ *  // print profiled data
  *  profiler_print(&pf);
- *  // must cleanup to prevent memory leak
- *  profiler_cleanup(&pf);
+ *
+ *  // free malloced memory
+ *  profiler_free(p);
+ *
  */
 
 #ifndef SHEEP_PROFILER_H
@@ -25,6 +26,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <time.h>
+
+typedef struct profiler Profiler;
 
 struct profile {
     char *name;
@@ -35,12 +38,13 @@ struct profile {
 struct profiler {
     struct profile *profiles;
     size_t len;
+    struct profile *last;
 };
 
-void profiler_init(struct profiler *profiler);
-void profiler_cleanup(struct profiler *profiler);
-void profiler_start(struct profiler *profiler, const char *name);
-void profiler_stop(struct profiler *profiler, const char *name);
+Profiler *profiler_new(void);
+void profiler_free(Profiler *p);
+void profiler_start(Profiler *p, const char *name);
+void profiler_stop(Profiler *p);
 
 #endif /* SHEEP_PROFILER_H */
 
@@ -79,10 +83,10 @@ static void _profile_stop(struct profile *profile)
     profile->start = 0L;
 }
 
-static struct profile *_profiler_find(struct profiler *profiler, const char *name)
+static struct profile *_profiler_find(Profiler *p, const char *name)
 {
     struct profile *target = NULL;
-    profiler_foreach(prof, i, profiler, {
+    profiler_foreach(prof, i, p, {
         if (strcmp(name, prof->name) == 0)
         {
             target = prof;
@@ -91,58 +95,68 @@ static struct profile *_profiler_find(struct profiler *profiler, const char *nam
     return target;
 }
 
-static struct profile *_profiler_find_create(struct profiler *profiler, const char *name)
+static struct profile *_profiler_find_create(Profiler *p, const char *name)
 {
-    if (profiler->profiles == NULL)
+    if (p->profiles == NULL)
     {
-        profiler->len = 0;
-        profiler->profiles = malloc(sizeof *profiler->profiles);
+        p->len = 0;
+        p->profiles = malloc(sizeof *p->profiles);
     }
-    struct profile *target = _profiler_find(profiler, name);
+    struct profile *target = _profiler_find(p, name);
     if (target)
     {
         return target;
     }
     else
     {
-        profiler->profiles = realloc(profiler->profiles, sizeof *profiler->profiles * (profiler->len + 1));
-        profiler->profiles[profiler->len++] = (struct profile) {
+        p->profiles = realloc(p->profiles, sizeof *p->profiles * (p->len + 1));
+        p->profiles[p->len++] = (struct profile) {
             .name = _profiler_strdup(name),
         };
-        return profiler->profiles + profiler->len - 1;
+        return p->profiles + p->len - 1;
     }
 }
 
-void profiler_cleanup(struct profiler *profiler)
+Profiler *profiler_new(void)
 {
-    if (profiler->profiles == NULL)
-        return;
-    profiler_foreach(prof, i, profiler, {
-        free(prof->name);
-    })
-    free(profiler->profiles);
+    Profiler *p = malloc(sizeof *p);
+    p->len = 0;
+    p->profiles = NULL;
+    p->last = NULL;
+    return p;
 }
 
-void profiler_start(struct profiler *profiler, const char *name)
+void profiler_free(Profiler *p)
 {
-    struct profile *target = _profiler_find_create(profiler, name);
+    if (p->profiles) free(p->profiles);
+    free(p);
+}
+
+void profiler_start(Profiler *p, const char *name)
+{
+    struct profile *target = _profiler_find_create(p, name);
     _profile_start(target);
+    p->last = target;
 }
 
-void profiler_stop(struct profiler *profiler, const char *name)
+void profiler_stop(Profiler *p)
 {
+    if (p->last)
+        _profile_stop(p->last);
+    /*
     struct profile *target = _profiler_find_create(profiler, name);
     _profile_stop(target);
+    */
 }
 
-void profiler_print(struct profiler *profiler)
+void profiler_print(Profiler *p)
 {
-    if (profiler->profiles == NULL)
+    if (p->profiles == NULL)
         return;
     int max_name_len = 0;
     uintmax_t total_clock = 0;
     int max_clock_len = 0;
-    profiler_foreach(prof, i, profiler, {
+    profiler_foreach(prof, i, p, {
         int nlen = strlen(prof->name);
         if (max_name_len < nlen) max_name_len = nlen;
         {
@@ -156,7 +170,7 @@ void profiler_print(struct profiler *profiler)
         }
         total_clock += prof->total;
     })
-    profiler_foreach(prof, i, profiler, {
+    profiler_foreach(prof, i, p, {
         printf("%*s: %*.0lf -- %2.2lf%\n", max_name_len, prof->name, max_clock_len,
                 (double)prof->total, 100 * prof->total / (double)total_clock);
     })
