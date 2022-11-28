@@ -4,7 +4,7 @@
  * Usage:
  *
  *  // make a context (opaque pointer)
- *  Profiler *p = profiler_new();
+ *  Profiler p = profiler_new();
  *
  *  profiler_start(p, "IO Op");
  *  FILE *fp = fopen("/dev/null", "w");
@@ -27,7 +27,7 @@
 #include <stddef.h>
 #include <time.h>
 
-typedef struct profiler Profiler;
+typedef struct profiler *Profiler;
 
 struct profile {
     char *name;
@@ -41,10 +41,10 @@ struct profiler {
     struct profile *last;
 };
 
-Profiler *profiler_new(void);
-void profiler_free(Profiler *p);
-void profiler_start(Profiler *p, const char *name);
-void profiler_stop(Profiler *p);
+Profiler profiler_new(void);
+void profiler_free(Profiler p);
+void profiler_start(Profiler p, const char *name);
+void profiler_stop(Profiler p);
 
 #endif /* SHEEP_PROFILER_H */
 
@@ -83,7 +83,7 @@ static void _profile_stop(struct profile *profile)
     profile->start = 0L;
 }
 
-static struct profile *_profiler_find(Profiler *p, const char *name)
+static struct profile *_profiler_find(Profiler p, const char *name)
 {
     struct profile *target = NULL;
     profiler_foreach(prof, i, p, {
@@ -95,7 +95,7 @@ static struct profile *_profiler_find(Profiler *p, const char *name)
     return target;
 }
 
-static struct profile *_profiler_find_create(Profiler *p, const char *name)
+static struct profile *_profiler_find_create(Profiler p, const char *name)
 {
     if (p->profiles == NULL)
     {
@@ -117,29 +117,29 @@ static struct profile *_profiler_find_create(Profiler *p, const char *name)
     }
 }
 
-Profiler *profiler_new(void)
+Profiler profiler_new(void)
 {
-    Profiler *p = malloc(sizeof *p);
+    Profiler p = malloc(sizeof *p);
     p->len = 0;
     p->profiles = NULL;
     p->last = NULL;
     return p;
 }
 
-void profiler_free(Profiler *p)
+void profiler_free(Profiler p)
 {
     if (p->profiles) free(p->profiles);
     free(p);
 }
 
-void profiler_start(Profiler *p, const char *name)
+void profiler_start(Profiler p, const char *name)
 {
     struct profile *target = _profiler_find_create(p, name);
     _profile_start(target);
     p->last = target;
 }
 
-void profiler_stop(Profiler *p)
+void profiler_stop(Profiler p)
 {
     if (p->last)
         _profile_stop(p->last);
@@ -149,7 +149,7 @@ void profiler_stop(Profiler *p)
     */
 }
 
-void profiler_print(Profiler *p)
+void profiler_print(Profiler p)
 {
     if (p->profiles == NULL)
         return;
