@@ -51,7 +51,7 @@ extern "C" {
 #define SJSON_X(a) a
 enum sjson_type { SJSON_TYPES_LIST };
 enum sjson_tokens { SJSON_TOKENS_LIST };
-enum sjson_resultnum { SJSON_ERR_LIST };
+enum SjsonResult { SJSON_ERR_LIST };
 #undef SJSON_X
 #define SJSON_X(a) #a
 static const char *sjson_type_names[] = {SJSON_TYPES_LIST};
@@ -59,7 +59,7 @@ static const char *sjson_err_names[] = {SJSON_ERR_LIST};
 static const char *sjson_token_names[] = {SJSON_TOKENS_LIST};
 #undef SJSON_X
 
-typedef enum sjson_resultnum sjson_resultnum;
+typedef enum SjsonResult sjson_resultnum;
 
 /**
  * @brief char buffer
@@ -148,7 +148,7 @@ sjson_result sjson_deserialize(const char *s, size_t len);
 sjsonbuf sjson_serialize(sjson *json);
 
 static void sjsonlexer_init(sjsonlexer *lexer, const char *s, size_t len);
-static sjson_resultnum sjsonlexer_lex(sjsonlexer *lexer);
+static SjsonResult sjsonlexer_lex(sjsonlexer *lexer);
 static sjson_result sjson_parse(sjsontokarr *toks);
 
 /**
@@ -161,13 +161,13 @@ sjson_result sjson_array_get(sjson *json, size_t i);
  * @param i index of child to replace
  * @param x new child value
  */
-sjson_resultnum sjson_array_set(sjson *json, size_t i, sjson *x);
+SjsonResult sjson_array_set(sjson *json, size_t i, sjson *x);
 /**
  * @brief remove i-th child of array
  * @param json array
  * @param i index of child element to remove
  */
-sjson_resultnum sjson_array_delete(sjson *json, size_t i);
+SjsonResult sjson_array_delete(sjson *json, size_t i);
 /**
  * @brief get first child of object with matching key
  * @param json object
@@ -185,21 +185,21 @@ sjson_result sjson_object_get(sjson *json, char *key);
  * before adding child. Causing every prior child having the same key
  * to be deleted
  */
-sjson_resultnum sjson_object_set(sjson *json, char *key, sjson *value);
+SjsonResult sjson_object_set(sjson *json, char *key, sjson *value);
 /**
  * @brief delete all child with matching key
  * @param json parent node
  * @param key key to delete
  */
-sjson_resultnum sjson_object_delete_all(sjson *json, char *key);
-// sjson_resultnum sjson_array_del(sjson *json, char *key, sjson *value);
+SjsonResult sjson_object_delete_all(sjson *json, char *key);
+// SjsonResult sjson_array_del(sjson *json, char *key, sjson *value);
 
 /**
  * @brief add child to json's children
  * @param json parent node
  * @param child child node
  */
-sjson_resultnum sjson_addchild(sjson *json, sjson *child);
+SjsonResult sjson_addchild(sjson *json, sjson *child);
 
 /**
  * @brief delete child from json's children
@@ -207,7 +207,7 @@ sjson_resultnum sjson_addchild(sjson *json, sjson *child);
  * @param child child node
  * @return SJSON_SUCCESS (0) if success, else non-zero
  */
-sjson_resultnum sjson_deletechild(sjson *json, sjson *child);
+SjsonResult sjson_deletechild(sjson *json, sjson *child);
 
 /**
  * @brief add element to end of array
@@ -288,7 +288,7 @@ static void sjsonlexer_init(sjsonlexer *lexer, const char *s, size_t len) {
     lexer->toks = sjsontokarr_new();
 }
 
-static sjson_resultnum sjsonlexer_lexnumber(sjsonlexer *lexer) {
+static SjsonResult sjsonlexer_lexnumber(sjsonlexer *lexer) {
     const char *numberstart = lexer->c;
     bool didpoint = false, didsign = false;
     sjsonbuf buf;
@@ -321,7 +321,7 @@ static sjson_resultnum sjsonlexer_lexnumber(sjsonlexer *lexer) {
     return SJSON_SUCCESS;
 }
 
-static sjson_resultnum sjsonlexer_lexstring(sjsonlexer *lexer) {
+static SjsonResult sjsonlexer_lexstring(sjsonlexer *lexer) {
     if (sjsonlexer_advance(lexer) != '\"')
         return SJSON_ERR_WRONG_TYPE;
 
@@ -385,7 +385,7 @@ static sjson_resultnum sjsonlexer_lexstring(sjsonlexer *lexer) {
     return SJSON_SUCCESS;
 }
 
-sjson_resultnum sjsonlexer_lexprimitive(sjsonlexer *lexer) {
+SjsonResult sjsonlexer_lexprimitive(sjsonlexer *lexer) {
     int type;
     ptrdiff_t len;
     switch (sjsonlexer_peek(lexer)) {
@@ -413,9 +413,9 @@ sjson_resultnum sjsonlexer_lexprimitive(sjsonlexer *lexer) {
     return SJSON_SUCCESS;
 }
 
-sjson_resultnum sjsonlexer_lex(sjsonlexer *lexer) {
+SjsonResult sjsonlexer_lex(sjsonlexer *lexer) {
     while (!sjsonlexer_isend(lexer)) {
-        sjson_resultnum ret;
+        SjsonResult ret;
         switch (sjsonlexer_peek(lexer)) {
         case '[':
             sjsonlexer_pushtok(lexer, SJSON_TKLSQUAREBRACKET, lexer->c,
@@ -518,7 +518,7 @@ static sjson_result sjson_parseobject(sjsontokarr *toks) {
             return child;
         }
         child.json->key = key;
-        sjson_resultnum ret = sjson_addchild(obj.json, child.json);
+        SjsonResult ret = sjson_addchild(obj.json, child.json);
         if (ret != SJSON_SUCCESS) {
             return (sjson_result){.err = ret};
         }
@@ -604,7 +604,7 @@ sjson_result sjson_parse(sjsontokarr *toks) {
     return ret;
 }
 
-sjson_resultnum sjson_replace(sjson *parent, sjson *oldsibling,
+SjsonResult sjson_replace(sjson *parent, sjson *oldsibling,
                               sjson *newsibling) {
     if (!oldsibling || !newsibling)
         return SJSON_ERR_NULL_REFERENCE;
@@ -622,7 +622,7 @@ sjson_resultnum sjson_replace(sjson *parent, sjson *oldsibling,
     return SJSON_SUCCESS;
 }
 
-sjson_resultnum sjson_deletechild(sjson *json, sjson *child) {
+SjsonResult sjson_deletechild(sjson *json, sjson *child) {
     if (json->v.child == NULL)
         return SJSON_ERR_NO_MATCHING_MEMBER;
     if (json->v.tail == child) {
@@ -650,7 +650,7 @@ sjson_result sjson_object_get(sjson *json, char *key) {
     };
 }
 
-sjson_resultnum sjson_object_delete_all(sjson *json, char *key) {
+SjsonResult sjson_object_delete_all(sjson *json, char *key) {
     if (json->type != SJSON_OBJECT)
         return SJSON_ERR_WRONG_TYPE;
     sjson_foreach(json, iter) if (!strcmp(iter->key, key))
@@ -658,7 +658,7 @@ sjson_resultnum sjson_object_delete_all(sjson *json, char *key) {
     return SJSON_SUCCESS;
 }
 
-sjson_resultnum sjson_object_set(sjson *json, char *key, sjson *value) {
+SjsonResult sjson_object_set(sjson *json, char *key, sjson *value) {
     if (json->type != SJSON_OBJECT)
         return SJSON_ERR_WRONG_TYPE;
     sjson_object_delete_all(json, key);
@@ -667,7 +667,7 @@ sjson_resultnum sjson_object_set(sjson *json, char *key, sjson *value) {
     return SJSON_SUCCESS;
 }
 
-sjson_resultnum sjson_addchild(sjson *json, sjson *child) {
+SjsonResult sjson_addchild(sjson *json, sjson *child) {
     if (json->type != SJSON_OBJECT && json->type != SJSON_ARRAY)
         return SJSON_ERR_WRONG_TYPE;
     if (json->v.tail == NULL && json->v.child == NULL) {
@@ -688,7 +688,7 @@ sjson_result sjson_array_get(sjson *json, size_t i) {
     };
 }
 
-sjson_resultnum sjson_array_set(sjson *json, size_t i, sjson *x) {
+SjsonResult sjson_array_set(sjson *json, size_t i, sjson *x) {
     sjson *it = json->v.child;
     for (size_t j = 0; it; j++) {
         if (j == i) {
@@ -700,7 +700,7 @@ sjson_resultnum sjson_array_set(sjson *json, size_t i, sjson *x) {
     return SJSON_ERR_NO_MATCHING_MEMBER;
 }
 
-sjson_resultnum sjson_array_delete(sjson *json, size_t i) {
+SjsonResult sjson_array_delete(sjson *json, size_t i) {
     sjson *it = json->v.child;
     for (size_t j = 0; it; j++) {
         if (j == i) {
@@ -716,7 +716,7 @@ sjson_result sjson_deserialize(const char *s, size_t len) {
     sjsonlexer lexer;
     sjson_result json;
     sjsonlexer_init(&lexer, s, len);
-    sjson_resultnum lexres = sjsonlexer_lex(&lexer);
+    SjsonResult lexres = sjsonlexer_lex(&lexer);
     if (lexres != SJSON_SUCCESS)
         return (sjson_result){.err = lexres};
     json = sjson_parse(&lexer.toks);

@@ -75,7 +75,7 @@ extern "C" {
                         perror("");             \
                     } while (0)
 
-void
+static void
 __stderr_log(const char *type, const char *file,
         const int line, const char *fmt, ...);
 
@@ -89,9 +89,12 @@ __stderr_log(const char *type, const char *file,
 
 #ifdef __cplusplus
 extern "C" {
+#include <cstdarg>
+#else
+#include <stdarg.h>
 #endif
 
-void
+static void
 __stderr_log(const char *type, const char *file
         , const int line, const char *fmt
         , ...)

@@ -11,16 +11,14 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#ifndef ffmt
 #define fmt(...) ffmt(stdout, __VA_ARGS__)
-#endif
+#define efmt(...) ffmt(stderr, __VA_ARGS__)
 
 typedef void (*fmt_callback)(FILE *, const void *const arg);
 
 void fmt_register(const char *, fmt_callback);
 void ffmt(FILE *out, const char *, ...);
 void fmt_set_flush(bool set);
-
 
 #endif /* SHEEP_FMT_H */
 
@@ -68,6 +66,9 @@ void ffmt(FILE *out, const char *fstr, ...) {
                 f += 4;
             } else if (strncmp(f, "uint}", 5) == 0) {
                 fprintf(out, "%u", va_arg(argptr, unsigned int));
+                f += 5;
+            } else if (strncmp(f, "bool}", 5) == 0) {
+                fputs(va_arg(argptr, int) ? "true": "false", out);
                 f += 5;
             } else if (strncmp(f, "char}", 5) == 0) {
                 fprintf(out, "%c", va_arg(argptr, int));
@@ -126,5 +127,6 @@ void ffmt(FILE *out, const char *fstr, ...) {
     if (fmt_flush) fflush(out);
 }
 
+#undef SHEEP_FMT_IMPLEMENTATION
 #endif /* SHEEP_FMT_IMPLEMENTATION */
 

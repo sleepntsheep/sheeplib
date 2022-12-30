@@ -6,6 +6,10 @@
  * dynarray.h is single-header library for
  * dynamic array in C, similar to std::vector in C++
  *
+ * Notes: These function require the pointer's type to be preserved!!
+ * Casting to and from void pointer is dangerous, you must cast back
+ * to original type before calling these functions
+ *
  * inspired by https://github.com/nothings/stb/blob/master/stb_ds.h
  *
  * Instruction & How to use
@@ -60,6 +64,8 @@
 extern "C" {
 #endif
 
+#pragma once
+
 #ifndef SHEEP_DYNARRAY_H
 #define SHEEP_DYNARRAY_H
 
@@ -78,22 +84,13 @@ extern "C" {
 #define DYNARRAY_FREE free
 #endif /* DYNARRAY_FREE */
 
-#ifndef DYNARRAY_MEMCPY
-#include <string.h>
-#define DYNARRAY_MEMCPY memcpy
-#endif /* DYNARRAY_MEMCPY */
-
-#ifndef DYNARRAY_ASSERT
-#include <assert.h>
-#define DYNARRAY_ASSERT assert
-#endif /* DYNARRAY_ASSERT */
-
 struct _dynarray_info {
     size_t length;   /* dynamic array length */
     size_t capacity; /* dynamic array capacity */
 };
 
 #define DYNARRAY_MIN_CAPACITY 4
+#define dynarray(T) T*
 
 #ifndef SHEEP_DYNARRAY_NOSHORTHAND
 
@@ -108,7 +105,6 @@ struct _dynarray_info {
 #define arrsetlen dynarray_setlen
 #define arrsetcap dynarray_setcap
 #define arrins dynarray_ins
-#define arrpushn dynarray_pushn
 
 #endif /* SHEEP_DYNARRAY_NOSHORTHAND */
 
@@ -123,7 +119,7 @@ size_t dynarray_first_2n_bigger_than(size_t x);
 /* C++ is bad and don't have implicit pointer conversion so we're stuck with
  * this */
 template <class T>
-T *dynarray_growf_wrapper(T *a, size_t cap, size_t membsize) {
+static T *dynarray_growf_wrapper(T *a, size_t cap, size_t membsize) {
     return (T *)dynarray_growf(a, cap, membsize);
 }
 #else
@@ -184,7 +180,7 @@ T *dynarray_growf_wrapper(T *a, size_t cap, size_t membsize) {
 #define dynarray_ins(A, idx, x)                                                \
     do {                                                                       \
         dynarray_ensure_empty((A), 1);                                         \
-        for (size_t i = idx; i <= dynarray_len(A); i++)                        \
+        for (size_t i = idx; i <= dynarray_len(A); i++)                          \
             (A)[i + 1] = (A)[i];                                               \
         (A)[idx] = (x);                                                        \
         dynarray_info(A)->length++;                                            \
@@ -197,7 +193,7 @@ T *dynarray_growf_wrapper(T *a, size_t cap, size_t membsize) {
  */
 #define dynarray_del(A, idx)                                                   \
     do {                                                                       \
-        for (size_t i = idx; i < dynarray_len(A) - 1; i++)                     \
+        for (size_t i = idx; i < dynarray_len(A) - 1; i++)                       \
             A[i] = A[i + 1];                                                   \
         dynarray_info(A)->length--;                                            \
     } while (0)
@@ -233,22 +229,7 @@ T *dynarray_growf_wrapper(T *a, size_t cap, size_t membsize) {
  * @return pointer to dynamic array (might be moved by realloc)
  */
 #define dynarray_setlen(A, n)                                                  \
-    (dynarray_setcap((A), (n)), dynarray_info(A)->length = (n))
-/**
- * @brief push n element starting at pointer p to dynamic array
- * @param A dynamic array
- * @param p location of elements
- * @param n count of elements to push
- *
- * sizeof type of element that p is pointing to ***must*** be
- * equal to sizeof element of dynamic array, and n is count of
- * elements, not total size, not bytes to copy
- */
-#define dynarray_pushn(A, p, n)                                                \
-    DYNARRAY_ASSERT(sizeof(*(p)) == sizeof(*(A)));                             \
-    dynarray_ensure_empty((A), (n));                                           \
-    DYNARRAY_MEMCPY((A) + dynarray_len(A), p, sizeof *(p)*n);                  \
-    dynarray_info(A)->length += n;
+    (dynarray_setcap((A), (n)), dynarray_info(A)->length = (n), (A))
 
 #endif /* SHEEP_DYNARRAY_H */
 
