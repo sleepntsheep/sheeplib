@@ -36,8 +36,6 @@ void renderer_save_ppm(struct Renderer *, const char *);
 #define ABS(a) ((a) < 0 ? (-(a)) : (a))
 #endif
 
-
-
 void renderer_init(struct Renderer *r, int width, int height)
 {
     r->width = width;
