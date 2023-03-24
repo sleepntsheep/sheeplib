@@ -14,17 +14,15 @@
 
 typedef struct
 {
-    size_t length;
     size_t alloc;
-    val_t *data;
     size_t head;
     size_t tail;
+    val_t *data;
 } con_t;
 
 con_t Cpref(init)(void)
 {
     con_t q;
-    q.length = 0;
     q.alloc = 0;
     q.data = NULL;
     q.head = 0;
@@ -76,14 +74,12 @@ void Cpref(push_back)(con_t *q, val_t x)
     Cpref(grow)(q, 1);
     q->data[q->head] = x;
     if (++q->head == q->alloc) q->head = 0;
-    ++q->length;
 }
 
 void Cpref(pop_back)(con_t *q)
 {
     assert(Cpref(size)(q));
     if (q->head > 0) --q->head; else q->head = q->alloc - 1;
-    --q->length;
 }
 
 void Cpref(push_front)(con_t *q, val_t x)
@@ -91,14 +87,12 @@ void Cpref(push_front)(con_t *q, val_t x)
     Cpref(grow)(q, 1);
     if (q->tail > 0) --q->tail; else q->tail = q->alloc - 1;
     q->data[q->tail] = x;
-    ++q->length;
 }
 
 void Cpref(pop_front)(con_t *q)
 {
     assert(Cpref(size)(q));
     if (++q->tail == q->alloc) q->tail = 0;
-    --q->length;
 }
 
 val_t Cpref(back)(con_t *q)
