@@ -1,3 +1,4 @@
+.gitignore
 test/bin
 smath.h
 smath-old.h
@@ -8,3 +9,4 @@ spool.h
 local
 djtstd.h
 test
+map.h

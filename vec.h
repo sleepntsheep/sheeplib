@@ -32,7 +32,7 @@ void Cpref(grow)(con_t *v, size_t n)
 {
     if (v->length + n >= v->alloc)
     {
-        v->alloc = v->alloc * 2 + 4;
+        v->alloc = v->alloc ? v->alloc * 2 : 32;
         if (v->alloc < v->length + n)
             v->alloc = v->length + n;
         v->data = (val_t*)realloc(v->data, sizeof(v->data[0]) * v->alloc);
